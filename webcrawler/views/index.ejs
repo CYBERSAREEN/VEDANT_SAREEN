@@ -612,7 +612,7 @@ async function startCrawl() {
   document.getElementById('live-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
   try {
-    const resp = await fetch('crawl/start', {
+    const resp = await fetch('/crawler/crawl/start', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ url, depth, delay, stayOnDomain: String(stayOnDomain) })
@@ -626,7 +626,7 @@ async function startCrawl() {
 
     // Open SSE stream
     if (eventSource) eventSource.close();
-    eventSource = new EventSource('crawl/stream/' + sessionId);
+    eventSource = new EventSource('/crawler/crawl/stream/' + sessionId);
 
     eventSource.onmessage = (e) => {
       let ev;
@@ -748,7 +748,7 @@ function finalizeCrawl(summary) {
 async function stopCrawl() {
   if (!sessionId) return;
   try {
-    await fetch('crawl/stop/' + sessionId, { method: 'POST' });
+    await fetch('/crawler/crawl/stop/' + sessionId, { method: 'POST' });
     addLog('info', 'Stop signal sent to crawler', Date.now());
   } catch (e) {
     addLog('err', 'Could not send stop signal');
@@ -759,11 +759,11 @@ async function stopCrawl() {
 async function loadResults() {
   if (!sessionId) return;
   try {
-    const resp = await fetch('status/' + sessionId);
+    const resp = await fetch('/crawler/status/' + sessionId);
     const data = await resp.json();
 
     // Fetch full results from the server
-    const fullResp = await fetch('download/' + sessionId + '/full_results.json');
+    const fullResp = await fetch('/crawler/download/' + sessionId + '/full_results.json');
     if (!fullResp.ok) return;
     allResults = await fullResp.json();
 
@@ -886,7 +886,7 @@ function setupDownloads() {
   const dlGrid = document.getElementById('dl-grid');
   dlGrid.innerHTML = files.map(f =>
     `<div class="dl-card">
-      <a href="/download/${sessionId}/${f.name}">
+      <a href="/crawler/download/${sessionId}/${f.name}">
         <span class="dl-icon">${f.icon}</span>
         <span class="dl-name">${f.name}</span>
         <span class="dl-desc">${f.desc}</span>
@@ -894,7 +894,7 @@ function setupDownloads() {
     </div>`
   ).join('');
 
-  const zipUrl = '/download/' + sessionId;
+  const zipUrl = '/crawler/download/' + sessionId;
   document.getElementById('dl-all-link').href = zipUrl;
   const dlAllBtn = document.getElementById('dl-all-btn');
   dlAllBtn.href = zipUrl;
