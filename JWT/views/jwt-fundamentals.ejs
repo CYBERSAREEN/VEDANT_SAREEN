@@ -1,0 +1,487 @@
+<%- include('partials/header') %>
+
+<section class="hero fade-in">
+  <span class="hero__badge">Module 01</span>
+  <h1 class="hero__title">JWT Fundamentals</h1>
+  <p class="hero__subtitle">Deep dive into JSON Web Tokens — structure, workflow, algorithms, entropy, and how OWASP Top 10 secures them.</p>
+</section>
+
+<div class="container fade-in">
+
+  <!-- What is JWT -->
+  <div class="section">
+    <div class="section__header">
+      <div class="section__number">Section 1.1</div>
+      <h2 class="section__title">What is JWT?</h2>
+    </div>
+    <div class="section__content">
+      <p><strong>JSON Web Token (JWT)</strong> is an open standard (<code>RFC 7519</code>) that defines a compact, URL-safe means of representing claims between two parties. The claims in a JWT are encoded as a JSON object that is used as the payload of a JSON Web Signature (JWS) structure or as the plaintext of a JSON Web Encryption (JWE) structure, enabling the claims to be digitally signed or integrity protected with a Message Authentication Code (MAC) and/or encrypted.</p>
+      <p>JWTs are widely used for <strong>authentication</strong> and <strong>information exchange</strong> in modern web applications, RESTful APIs, single-page applications (SPAs), and microservices architectures.</p>
+    </div>
+  </div>
+
+  <!-- JWT Structure -->
+  <div class="section">
+    <div class="section__header">
+      <div class="section__number">Section 1.2</div>
+      <h2 class="section__title">JWT Structure — The Three Parts</h2>
+    </div>
+
+    <div class="jwt-visual">
+      <div class="jwt-visual__token">
+        <span class="jwt-visual__header">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9</span><span class="jwt-visual__dot">.</span><span class="jwt-visual__payload">eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNTE2MjM5MDIyfQ</span><span class="jwt-visual__dot">.</span><span class="jwt-visual__signature">SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c</span>
+      </div>
+
+      <div class="jwt-visual__parts">
+        <div class="jwt-visual__part jwt-visual__part--header">
+          <div class="jwt-visual__part-title">🔴 Header</div>
+          <pre>{
+  "alg": "HS256",
+  "typ": "JWT"
+}</pre>
+          <p style="font-size:0.8rem;color:var(--text-muted);margin-top:8px;">Specifies the token type and signing algorithm</p>
+        </div>
+        <div class="jwt-visual__part jwt-visual__part--payload">
+          <div class="jwt-visual__part-title">🟣 Payload (Claims)</div>
+          <pre>{
+  "sub": "1234567890",
+  "name": "John Doe",
+  "role": "admin",
+  "iat": 1516239022
+}</pre>
+          <p style="font-size:0.8rem;color:var(--text-muted);margin-top:8px;">Contains user data and metadata claims</p>
+        </div>
+        <div class="jwt-visual__part jwt-visual__part--signature">
+          <div class="jwt-visual__part-title">🔵 Signature</div>
+          <pre>HMACSHA256(
+  base64UrlEncode(header) + "." +
+  base64UrlEncode(payload),
+  secret
+)</pre>
+          <p style="font-size:0.8rem;color:var(--text-muted);margin-top:8px;">Verifies token integrity and authenticity</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Static vs Dynamic -->
+  <div class="section">
+    <div class="section__header">
+      <div class="section__number">Section 1.3</div>
+      <h2 class="section__title">Static vs Dynamic Tokens</h2>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Aspect</th>
+            <th>Static Tokens</th>
+            <th>Dynamic Tokens (JWT)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Definition</strong></td>
+            <td>Fixed, unchanging tokens (like API keys)</td>
+            <td>Generated per session with expiration (JWTs)</td>
+          </tr>
+          <tr>
+            <td><strong>Lifespan</strong></td>
+            <td>Valid until manually revoked</td>
+            <td>Auto-expires via <code>exp</code> claim</td>
+          </tr>
+          <tr>
+            <td><strong>Security</strong></td>
+            <td>❌ High risk if leaked — stays valid forever</td>
+            <td>✅ Limited window of attack even if stolen</td>
+          </tr>
+          <tr>
+            <td><strong>Rotation</strong></td>
+            <td>Manual — admin must regenerate</td>
+            <td>Automatic via refresh token flow</td>
+          </tr>
+          <tr>
+            <td><strong>Use Case</strong></td>
+            <td>Server-to-server APIs, CI/CD tokens</td>
+            <td>User auth, SPA sessions, microservices</td>
+          </tr>
+          <tr>
+            <td><strong>Statefulness</strong></td>
+            <td>Requires server-side storage mapping</td>
+            <td>Stateless — self-contained claims</td>
+          </tr>
+          <tr>
+            <td><strong>Example</strong></td>
+            <td><code>x-api-key: sk_live_abc123</code></td>
+            <td><code>Authorization: Bearer eyJhbG...</code></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- JWT Workflow -->
+  <div class="section">
+    <div class="section__header">
+      <div class="section__number">Section 1.4</div>
+      <h2 class="section__title">JWT Authentication Workflow</h2>
+    </div>
+
+    <div class="workflow">
+      <div class="workflow__step">
+        <div class="workflow__step-num">Step 1</div>
+        <div class="workflow__step-title">Client Login</div>
+        <div class="workflow__step-desc">User sends credentials</div>
+      </div>
+      <span class="workflow__arrow">→</span>
+      <div class="workflow__step">
+        <div class="workflow__step-num">Step 2</div>
+        <div class="workflow__step-title">Server Validates</div>
+        <div class="workflow__step-desc">Check against DB</div>
+      </div>
+      <span class="workflow__arrow">→</span>
+      <div class="workflow__step">
+        <div class="workflow__step-num">Step 3</div>
+        <div class="workflow__step-title">Create JWT</div>
+        <div class="workflow__step-desc">Sign with secret key</div>
+      </div>
+      <span class="workflow__arrow">→</span>
+      <div class="workflow__step">
+        <div class="workflow__step-num">Step 4</div>
+        <div class="workflow__step-title">Send to Client</div>
+        <div class="workflow__step-desc">Return JWT in response</div>
+      </div>
+      <span class="workflow__arrow">→</span>
+      <div class="workflow__step">
+        <div class="workflow__step-num">Step 5</div>
+        <div class="workflow__step-title">Store Token</div>
+        <div class="workflow__step-desc">Client saves JWT</div>
+      </div>
+      <span class="workflow__arrow">→</span>
+      <div class="workflow__step">
+        <div class="workflow__step-num">Step 6</div>
+        <div class="workflow__step-title">Send in Header</div>
+        <div class="workflow__step-desc">Bearer token in requests</div>
+      </div>
+      <span class="workflow__arrow">→</span>
+      <div class="workflow__step">
+        <div class="workflow__step-num">Step 7</div>
+        <div class="workflow__step-title">Verify & Serve</div>
+        <div class="workflow__step-desc">Server validates & responds</div>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-block__header">
+        <span class="code-block__lang">JavaScript — Server Side</span>
+        <button class="code-block__copy">Copy</button>
+      </div>
+      <pre><code>// Step 3: Creating the JWT
+const jwt = require('jsonwebtoken');
+const SECRET = process.env.JWT_SECRET; // 256-bit random key
+
+const token = jwt.sign(
+  {
+    sub: user.id,           // Subject (user ID)
+    name: user.name,        // Custom claim
+    role: user.role,        // Authorization claim
+    iat: Math.floor(Date.now() / 1000),  // Issued at
+    exp: Math.floor(Date.now() / 1000) + (60 * 60)  // Expires in 1 hour
+  },
+  SECRET,
+  { algorithm: 'HS256' }
+);
+
+// Step 7: Verifying the JWT
+app.use((req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader?.startsWith('Bearer ')) return res.status(401).json({ error: 'No token' });
+
+  const token = authHeader.split(' ')[1];
+  try {
+    const decoded = jwt.verify(token, SECRET, { algorithms: ['HS256'] });
+    req.user = decoded;  // Attach user claims to request
+    next();
+  } catch (err) {
+    return res.status(403).json({ error: 'Invalid or expired token' });
+  }
+});</code></pre>
+    </div>
+  </div>
+
+  <!-- Algorithms -->
+  <div class="section">
+    <div class="section__header">
+      <div class="section__number">Section 1.5</div>
+      <h2 class="section__title">JWT Signing Algorithms</h2>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Algorithm</th>
+            <th>Type</th>
+            <th>Description</th>
+            <th>Key Requirement</th>
+            <th>Security Level</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>HS256</code></td>
+            <td>Symmetric</td>
+            <td>HMAC using SHA-256</td>
+            <td>Shared secret (≥256 bits)</td>
+            <td>✅ Strong — most common</td>
+          </tr>
+          <tr>
+            <td><code>HS384</code></td>
+            <td>Symmetric</td>
+            <td>HMAC using SHA-384</td>
+            <td>Shared secret (≥384 bits)</td>
+            <td>✅ Stronger hash</td>
+          </tr>
+          <tr>
+            <td><code>HS512</code></td>
+            <td>Symmetric</td>
+            <td>HMAC using SHA-512</td>
+            <td>Shared secret (≥512 bits)</td>
+            <td>✅ Strongest HMAC</td>
+          </tr>
+          <tr>
+            <td><code>RS256</code></td>
+            <td>Asymmetric</td>
+            <td>RSA + SHA-256</td>
+            <td>Private/Public key pair</td>
+            <td>✅ Best for distributed systems</td>
+          </tr>
+          <tr>
+            <td><code>RS384</code></td>
+            <td>Asymmetric</td>
+            <td>RSA + SHA-384</td>
+            <td>RSA key pair (≥2048 bits)</td>
+            <td>✅ Strong</td>
+          </tr>
+          <tr>
+            <td><code>RS512</code></td>
+            <td>Asymmetric</td>
+            <td>RSA + SHA-512</td>
+            <td>RSA key pair (≥4096 bits)</td>
+            <td>✅ Very strong</td>
+          </tr>
+          <tr>
+            <td><code>ES256</code></td>
+            <td>Asymmetric</td>
+            <td>ECDSA + P-256 curve</td>
+            <td>EC key pair (256 bits)</td>
+            <td>✅ Compact + fast</td>
+          </tr>
+          <tr>
+            <td><code>PS256</code></td>
+            <td>Asymmetric</td>
+            <td>RSA-PSS + SHA-256</td>
+            <td>RSA key pair</td>
+            <td>✅ Probabilistic</td>
+          </tr>
+          <tr>
+            <td><code>EdDSA</code></td>
+            <td>Asymmetric</td>
+            <td>Edwards-curve DSA</td>
+            <td>Ed25519 key pair</td>
+            <td>✅ Modern, very fast</td>
+          </tr>
+          <tr>
+            <td><code>none</code></td>
+            <td>None</td>
+            <td>No signature!</td>
+            <td>No key</td>
+            <td>❌ INSECURE — attack vector</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="info-box info-box--warning">
+      <div class="info-box__title">⚠️ Algorithm Confusion Attack</div>
+      <div class="info-box__content">
+        <p>If a server is configured for RS256 (asymmetric) but accepts HS256 (symmetric), an attacker can use the <strong>public key</strong> (which is publicly available) as the HMAC secret to forge valid tokens. Always whitelist allowed algorithms on the server:</p>
+        <code>jwt.verify(token, key, { algorithms: ['RS256'] })</code>
+      </div>
+    </div>
+  </div>
+
+  <!-- Token Entropy -->
+  <div class="section">
+    <div class="section__header">
+      <div class="section__number">Section 1.6</div>
+      <h2 class="section__title">Token Entropy & Security</h2>
+    </div>
+    <div class="section__content">
+      <p><strong>Entropy</strong> measures the randomness and unpredictability of a token. Higher entropy = harder to guess or brute-force.</p>
+    </div>
+
+    <div class="info-box info-box--explain">
+      <div class="info-box__title">ℹ️ Understanding Entropy</div>
+      <div class="info-box__content">
+        <ul>
+          <li><strong>Entropy formula:</strong> H = log₂(N^L) where N = character set size, L = length</li>
+          <li><strong>Low entropy:</strong> Sequential IDs (<code>token_001</code>), timestamps, predictable patterns — easily guessable</li>
+          <li><strong>High entropy:</strong> Cryptographically random bytes — resistant to brute-force</li>
+          <li><strong>JWT entropy depends on:</strong> Secret key strength, algorithm choice, payload uniqueness</li>
+          <li><strong>Minimum recommended:</strong> 256 bits of entropy for HMAC secrets</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-block__header">
+        <span class="code-block__lang">JavaScript — Generating Secure Secrets</span>
+        <button class="code-block__copy">Copy</button>
+      </div>
+      <pre><code>const crypto = require('crypto');
+
+// ✅ GOOD: 256-bit cryptographically random secret
+const secret = crypto.randomBytes(32).toString('hex');
+// → "a3f8c2d1e9b4567890abcdef12345678..." (64 hex chars = 256 bits)
+
+// ❌ BAD: Weak/predictable secrets
+const weakSecret1 = "password123";           // Crackable in seconds
+const weakSecret2 = "my-jwt-secret";         // Dictionary attackable
+const weakSecret3 = String(Date.now());       // Predictable timestamp
+
+// Entropy comparison:
+// "password123"     → ~36 bits  (💀 cracked in milliseconds)
+// "my-jwt-secret"   → ~70 bits  (⚠️  cracked in hours)
+// crypto.randomBytes(32) → 256 bits (✅ computationally infeasible)</code></pre>
+    </div>
+  </div>
+
+  <!-- OWASP JWT Security -->
+  <div class="section">
+    <div class="section__header">
+      <div class="section__number">Section 1.7</div>
+      <h2 class="section__title">How OWASP Top 10 Protects JWT</h2>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>OWASP Category</th>
+            <th>JWT Relevance</th>
+            <th>Protection</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>A01: Broken Access Control</strong></td>
+            <td>JWT claims used for role-based access</td>
+            <td>Validate <code>role</code>, <code>sub</code> claims server-side before granting access</td>
+          </tr>
+          <tr>
+            <td><strong>A02: Cryptographic Failures</strong></td>
+            <td>Weak signing secrets, alg:none attack</td>
+            <td>Use 256-bit+ secrets, whitelist algorithms, never use <code>none</code></td>
+          </tr>
+          <tr>
+            <td><strong>A03: Injection</strong></td>
+            <td>KID parameter injection, claim injection</td>
+            <td>Sanitize all JWT header parameters, use parameterized queries</td>
+          </tr>
+          <tr>
+            <td><strong>A04: Insecure Design</strong></td>
+            <td>No token expiry, no refresh flow</td>
+            <td>Set <code>exp</code> claims, implement refresh token rotation</td>
+          </tr>
+          <tr>
+            <td><strong>A05: Security Misconfiguration</strong></td>
+            <td>Default secrets, exposed keys in repos</td>
+            <td>Use env vars, rotate secrets, never commit keys to git</td>
+          </tr>
+          <tr>
+            <td><strong>A07: Auth Failures</strong></td>
+            <td>No token verification, missing exp check</td>
+            <td>Always verify signature + expiration server-side</td>
+          </tr>
+          <tr>
+            <td><strong>A08: Integrity Failures</strong></td>
+            <td>Token tampering, unsigned tokens</td>
+            <td>Verify signatures, reject unsigned/modified tokens</td>
+          </tr>
+          <tr>
+            <td><strong>A09: Logging Failures</strong></td>
+            <td>Not logging auth failures</td>
+            <td>Log failed JWT verifications for monitoring</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- JWT Claim Types -->
+  <div class="section">
+    <div class="section__header">
+      <div class="section__number">Section 1.8</div>
+      <h2 class="section__title">JWT Claim Types</h2>
+    </div>
+
+    <div class="info-box info-box--explain">
+      <div class="info-box__title">ℹ️ Registered (Standard) Claims</div>
+      <div class="info-box__content">
+        <ul>
+          <li><code>iss</code> (Issuer) — Who created and signed the token</li>
+          <li><code>sub</code> (Subject) — The user/entity the token represents</li>
+          <li><code>aud</code> (Audience) — Intended recipient(s) of the token</li>
+          <li><code>exp</code> (Expiration) — Unix timestamp when token expires</li>
+          <li><code>nbf</code> (Not Before) — Token not valid before this time</li>
+          <li><code>iat</code> (Issued At) — When the token was created</li>
+          <li><code>jti</code> (JWT ID) — Unique identifier to prevent replay attacks</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="info-box info-box--example">
+      <div class="info-box__title">🟣 Common Custom Claims</div>
+      <div class="info-box__content">
+        <ul>
+          <li><code>role</code> — User's role (admin, user, moderator)</li>
+          <li><code>permissions</code> — Array of specific permissions</li>
+          <li><code>email</code> — User's email address</li>
+          <li><code>org_id</code> — Organization/tenant identifier</li>
+          <li><code>scope</code> — OAuth2 scopes granted</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Best Practices -->
+  <div class="section">
+    <div class="section__header">
+      <div class="section__number">Section 1.9</div>
+      <h2 class="section__title">JWT Security Best Practices</h2>
+    </div>
+
+    <div class="info-box info-box--remediation">
+      <div class="info-box__title">✅ Best Practices Checklist</div>
+      <div class="info-box__content">
+        <ul>
+          <li>✅ Use strong secrets (256-bit minimum for HMAC)</li>
+          <li>✅ Always set <code>exp</code> (expiration) — max 15-30 minutes for access tokens</li>
+          <li>✅ Whitelist algorithms server-side: <code>{ algorithms: ['HS256'] }</code></li>
+          <li>✅ Validate all claims: <code>iss</code>, <code>aud</code>, <code>sub</code>, <code>exp</code></li>
+          <li>✅ Use refresh tokens for long-lived sessions</li>
+          <li>✅ Store tokens securely (HttpOnly cookies > localStorage)</li>
+          <li>✅ Implement token revocation (blacklist or versioning)</li>
+          <li>✅ Use asymmetric algorithms (RS256/ES256) for distributed systems</li>
+          <li>✅ Never put sensitive data in the payload (it's only Base64 encoded, not encrypted)</li>
+          <li>✅ Rotate secrets periodically and on compromise</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<%- include('partials/footer') %>

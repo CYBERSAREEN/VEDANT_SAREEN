@@ -1,843 +1,347 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Vedant Sareen — Elite Cybersecurity Engineer</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;700&family=Bebas+Neue&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-<style>
-:root{
-  --bg:#020509;--bg2:#060d1a;
-  --c1:#00f5ff;--c2:#8b2fff;--c3:#00ff9d;--c4:#ff2d6b;--c5:#ffb800;
-  --txt:#d8e8ff;--muted:#3a5478;
-  --glass:rgba(5,14,32,0.7);--glass2:rgba(8,20,48,0.5);
-  --border:rgba(0,245,255,0.09);--borderp:rgba(139,47,255,0.18);
-  --glow1:0 0 30px rgba(0,245,255,0.2),0 0 80px rgba(0,245,255,0.07);
-  --glow2:0 0 30px rgba(139,47,255,0.25),0 0 80px rgba(139,47,255,0.08);
-  --glow3:0 0 20px rgba(0,255,157,0.2);
-}
-*{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--txt);font-family:'Space Grotesk',sans-serif;overflow-x:hidden;cursor:none}
-::selection{background:rgba(0,245,255,0.18);color:#fff}
-::-webkit-scrollbar{width:2px}
-::-webkit-scrollbar-track{background:var(--bg)}
-::-webkit-scrollbar-thumb{background:linear-gradient(var(--c1),var(--c2))}
-
-/* CURSOR */
-#cur{position:fixed;width:7px;height:7px;background:var(--c1);border-radius:50%;pointer-events:none;z-index:99999;transform:translate(-50%,-50%);mix-blend-mode:screen;box-shadow:0 0 10px var(--c1);transition:transform .08s,width .25s,height .25s,background .25s}
-#cur-r{position:fixed;width:30px;height:30px;border:1px solid rgba(0,245,255,0.35);border-radius:50%;pointer-events:none;z-index:99998;transform:translate(-50%,-50%);transition:width .3s,height .3s,border-color .3s}
-body.hov #cur{width:18px;height:18px;background:var(--c2);box-shadow:0 0 18px var(--c2)}
-body.hov #cur-r{width:52px;height:52px;border-color:rgba(139,47,255,0.45)}
-
-/* PRELOADER */
-#loader{position:fixed;inset:0;z-index:999999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;overflow:hidden}
-#loader::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,245,255,0.012) 3px,rgba(0,245,255,0.012) 4px)}
-.ld-ring{width:80px;height:80px;border:1px solid rgba(0,245,255,0.15);border-top:1px solid var(--c1);border-radius:50%;animation:spin 1.2s linear infinite;margin-bottom:32px;position:relative;box-shadow:0 0 20px rgba(0,245,255,0.1)}
-.ld-ring::after{content:'';position:absolute;inset:8px;border:1px solid rgba(139,47,255,0.2);border-bottom:1px solid var(--c2);border-radius:50%;animation:spin 1.8s linear infinite reverse}
-@keyframes spin{to{transform:rotate(360deg)}}
-.ld-name{font-family:'Bebas Neue',sans-serif;font-size:clamp(32px,6vw,72px);letter-spacing:10px;background:linear-gradient(135deg,#fff,var(--c1),var(--c2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;opacity:0;transform:translateY(20px)}
-.ld-role{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:5px;color:var(--muted);margin-top:6px;opacity:0}
-.ld-bar{width:240px;height:1px;background:rgba(0,245,255,0.08);margin-top:40px;position:relative;overflow:hidden}
-.ld-bar-fill{height:100%;width:0;background:linear-gradient(90deg,var(--c1),var(--c2));position:relative}
-.ld-bar-fill::after{content:'';position:absolute;right:-1px;top:-2px;width:5px;height:5px;border-radius:50%;background:var(--c1);box-shadow:0 0 8px var(--c1)}
-.ld-pct{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--c1);margin-top:12px;letter-spacing:3px}
-.ld-msg{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);margin-top:6px;letter-spacing:2px;height:14px}
-
-/* CANVAS + OVERLAYS */
-#bg-c{position:fixed;inset:0;z-index:0}
-.hex-bg{position:fixed;inset:0;z-index:1;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='104'%3E%3Cpath d='M30 69L2 52V18L30 0l28 18v34z' fill='none' stroke='rgba(0,245,255,0.025)' stroke-width='1'/%3E%3C/svg%3E");background-size:60px 104px}
-.vign{position:fixed;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse 75% 75% at 50% 50%,transparent 35%,rgba(2,5,9,0.75) 100%)}
-.noise{position:fixed;inset:0;z-index:2;pointer-events:none;opacity:0.018;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:128px}
-.scanline{position:fixed;inset:0;z-index:2;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.015) 2px,rgba(0,0,0,0.015) 4px)}
-
-/* MOBILE MENU */
-.mob-overlay{position:fixed;inset:0;z-index:9000;background:rgba(2,5,9,0.97);backdrop-filter:blur(20px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:36px;transform:translateX(100%);transition:transform .5s cubic-bezier(.16,1,.3,1)}
-.mob-overlay.open{transform:none}
-.mob-overlay a{font-family:'Bebas Neue',sans-serif;font-size:clamp(28px,7vw,48px);letter-spacing:6px;color:var(--txt);text-decoration:none;transition:color .3s;position:relative}
-.mob-overlay a::before{content:'';position:absolute;bottom:-4px;left:0;width:0;height:1px;background:linear-gradient(90deg,var(--c1),var(--c2));transition:width .4s}
-.mob-overlay a:hover{color:var(--c1)}
-.mob-overlay a:hover::before{width:100%}
-.mob-close{position:absolute;top:28px;right:28px;background:none;border:none;color:var(--muted);font-size:22px;cursor:none;transition:color .3s}
-.mob-close:hover{color:var(--c1)}
-
-/* NAV */
-nav{position:fixed;inset-block-start:0;inset-inline:0;z-index:1000;height:64px;padding:0 5%;display:flex;align-items:center;justify-content:space-between;transition:all .4s}
-nav.solid{background:rgba(2,5,9,0.92);backdrop-filter:blur(24px);border-bottom:1px solid var(--border)}
-.n-logo{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:5px;color:var(--c1);text-decoration:none;position:relative;flex-shrink:0}
-.n-logo span{position:absolute;left:0;top:calc(100% + 2px);font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:3px;color:var(--muted);white-space:nowrap}
-.n-links{display:flex;gap:28px;list-style:none}
-.n-links a{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--muted);text-decoration:none;transition:color .3s;position:relative;padding-bottom:4px}
-.n-links a::after{content:'';position:absolute;bottom:0;left:0;width:0;height:1px;background:linear-gradient(90deg,var(--c1),var(--c2));transition:width .4s}
-.n-links a:hover{color:var(--txt)}
-.n-links a:hover::after,.n-links a.active::after{width:100%}
-.n-links a.active{color:var(--c1)}
-.n-hire{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;padding:8px 18px;border:1px solid rgba(0,245,255,0.25);color:var(--c1);background:transparent;text-decoration:none;transition:all .3s;cursor:none;clip-path:polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%)}
-.n-hire:hover{background:rgba(0,245,255,0.07);box-shadow:var(--glow1)}
-.ham{display:none;flex-direction:column;gap:5px;cursor:none;background:none;border:none;padding:4px}
-.ham span{display:block;width:22px;height:1px;background:var(--c1);transition:all .3s}
-
-/* SHARED SECTION STYLES */
-section{position:relative;z-index:3;padding:100px 5%}
-.sh{display:flex;align-items:center;gap:12px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:4px;color:var(--c1);margin-bottom:12px}
-.sh::before{content:'';width:28px;height:1px;background:linear-gradient(90deg,var(--c1),transparent)}
-.st{font-family:'Bebas Neue',sans-serif;font-size:clamp(34px,5vw,68px);letter-spacing:3px;line-height:1}
-.st em{font-style:normal;-webkit-text-fill-color:transparent;-webkit-text-stroke:1.5px var(--c1)}
-.sd{width:44px;height:2px;background:linear-gradient(90deg,var(--c1),var(--c2));margin-top:12px;margin-bottom:52px}
-
-/* HERO */
-#hero{min-height:100vh;display:grid;place-items:center;padding:0 5%;overflow:hidden}
-.hero-wrap{display:grid;grid-template-columns:1fr 380px;gap:56px;align-items:center;width:100%;max-width:1360px}
-.h-tag{display:inline-flex;align-items:center;gap:10px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:4px;color:var(--c3);margin-bottom:22px;opacity:0}
-.h-tag i{width:7px;height:7px;border-radius:50%;background:var(--c3);box-shadow:0 0 10px var(--c3);animation:pulse 2s infinite;flex-shrink:0}
-@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.5);opacity:.5}}
-.h-name{font-family:'Bebas Neue',sans-serif;font-size:clamp(64px,9.5vw,136px);line-height:.88;letter-spacing:2px;opacity:0;transform:translateY(90px)}
-.h-name .ln1{display:block;background:linear-gradient(90deg,#fff,rgba(255,255,255,.75));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.h-name .ln2{display:block;background:linear-gradient(90deg,var(--c1),var(--c2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.h-typed{font-family:'JetBrains Mono',monospace;font-size:clamp(11px,1.4vw,14px);color:var(--muted);letter-spacing:3px;margin-top:18px;height:22px;opacity:0}
-.h-typed span{color:var(--c1)}
-.h-typed .bk{animation:blink 1s steps(1) infinite}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
-.h-desc{font-size:15px;line-height:1.9;color:rgba(216,232,255,.52);max-width:500px;margin-top:18px;opacity:0}
-.h-desc strong{color:var(--c1);font-weight:500}
-.h-btns{display:flex;flex-wrap:wrap;gap:12px;margin-top:32px;opacity:0}
-.btn{display:inline-flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:3px;padding:13px 26px;text-decoration:none;transition:all .35s;cursor:none;position:relative;overflow:hidden;clip-path:polygon(7px 0,100% 0,calc(100% - 7px) 100%,0 100%)}
-.btn.s{background:linear-gradient(135deg,var(--c1),var(--c2));color:#000;font-weight:700}
-.btn.s::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--c2),var(--c1));opacity:0;transition:opacity .4s}
-.btn.s:hover::after{opacity:1}
-.btn.s:hover{transform:translateY(-3px);box-shadow:var(--glow1)}
-.btn.o{border:1px solid rgba(0,245,255,0.22);color:var(--c1)}
-.btn.o:hover{background:rgba(0,245,255,0.06);border-color:var(--c1);transform:translateY(-3px);box-shadow:var(--glow1)}
-.h-nums{display:flex;gap:36px;margin-top:44px;padding-top:32px;border-top:1px solid var(--border);opacity:0;flex-wrap:wrap}
-.hn .v{font-family:'Bebas Neue',sans-serif;font-size:44px;line-height:1;background:linear-gradient(135deg,var(--c1),var(--c2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.hn .l{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);margin-top:3px}
-.h-terminal{background:rgba(4,10,26,0.9);border:1px solid rgba(0,245,255,0.1);backdrop-filter:blur(24px);border-radius:14px;overflow:hidden;opacity:0;transform:translateX(70px)}
-.tb{display:flex;align-items:center;gap:7px;padding:11px 14px;background:rgba(0,0,0,0.35);border-bottom:1px solid var(--border)}
-.td{width:10px;height:10px;border-radius:50%}
-.td:nth-child(1){background:#ff5f57}.td:nth-child(2){background:#febc2e}.td:nth-child(3){background:#28c840}
-.tt{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);margin-left:6px;letter-spacing:2px}
-.tbody{padding:18px;font-family:'JetBrains Mono',monospace;font-size:11.5px;line-height:2}
-.tl{display:block}
-.tl .p{color:var(--c3)}.tl .c{color:var(--txt)}.tl .k{color:var(--muted);padding-left:12px}
-.tl .v{color:var(--c1)}.tl .v2{color:var(--c2)}.tl .ok{color:var(--c3)}.tl .warn{color:var(--c5)}
-.sc{position:absolute;bottom:28px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;opacity:0;z-index:5}
-.sc span{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:4px;color:var(--muted)}
-.sc-ln{width:1px;height:44px;background:linear-gradient(to bottom,var(--c1),transparent);animation:scp 2s ease-in-out infinite}
-@keyframes scp{0%,100%{opacity:1}50%{opacity:.3}}
-
-/* ABOUT */
-.about-g{display:grid;grid-template-columns:340px 1fr;gap:60px;align-items:start}
-.a-card{background:var(--glass);border:1px solid var(--border);border-radius:16px;padding:26px;position:relative;overflow:hidden}
-.a-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--c1),var(--c2),transparent)}
-.a-card::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 80% 0%,rgba(0,245,255,0.04),transparent 60%);pointer-events:none}
-.a-hd{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--c1);margin-bottom:18px;display:flex;align-items:center;gap:8px}
-.a-hd::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--c1);box-shadow:0 0 8px var(--c1)}
-.prow{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(0,245,255,0.045)}
-.prow:last-child{border:none}
-.pk{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px}
-.pv{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--txt)}
-.pv.hi{color:var(--c1)}.pv.hi2{color:var(--c3)}.pv.hi3{color:var(--c5)}
-.a-text p{font-size:15px;line-height:1.9;color:rgba(216,232,255,.58);margin-bottom:16px}
-.a-text p strong{color:var(--txt);font-weight:500}
-.chip-r{display:flex;flex-wrap:wrap;gap:7px;margin-top:20px}
-.chip{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1px;padding:5px 11px;border:1px solid var(--borderp);color:rgba(216,232,255,.55);border-radius:4px;transition:all .25s;cursor:default}
-.chip:hover{border-color:var(--c2);color:var(--c2);background:rgba(139,47,255,.08)}
-.brag{margin-top:24px;background:rgba(0,255,157,0.04);border:1px solid rgba(0,255,157,0.15);border-radius:10px;padding:14px 18px}
-.brag p{font-size:13px;line-height:1.8;color:rgba(0,255,157,.65)}
-.brag strong{color:var(--c3)}
-
-/* SKILLS */
-#skills{background:linear-gradient(180deg,transparent,rgba(0,18,44,.1) 50%,transparent)}
-.sk-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-.sk-card{background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:22px;position:relative;overflow:hidden;transition:all .35s}
-.sk-card::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(0,245,255,0.055),transparent 55%);opacity:0;transition:opacity .35s;pointer-events:none}
-.sk-card:hover{border-color:rgba(0,245,255,0.22);transform:translateY(-5px);box-shadow:0 16px 48px rgba(0,0,0,.4)}
-.sk-card:hover::after{opacity:1}
-.sk-ic{font-size:20px;margin-bottom:10px}
-.sk-t{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--c1);margin-bottom:12px}
-.sk-chips{display:flex;flex-wrap:wrap;gap:5px}
-.sk-ch{font-family:'JetBrains Mono',monospace;font-size:9px;padding:3px 8px;background:rgba(0,245,255,0.04);border:1px solid rgba(0,245,255,0.1);color:rgba(216,232,255,.48);border-radius:3px;transition:all .22s}
-.sk-ch:hover{background:rgba(0,245,255,0.1);border-color:var(--c1);color:var(--c1)}
-.prof-bars{margin-top:52px}
-.pb-title{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--c2);margin-bottom:22px}
-.pb-row{margin-bottom:13px}
-.pb-meta{display:flex;justify-content:space-between;margin-bottom:5px}
-.pb-n{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--txt)}
-.pb-p{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--c1)}
-.pb-track{height:2px;background:rgba(0,245,255,0.07);border-radius:2px;overflow:hidden}
-.pb-fill{height:100%;width:0;border-radius:2px;transition:width 1.5s cubic-bezier(.16,1,.3,1)}
-.pb-fill.a{background:linear-gradient(90deg,var(--c1),var(--c2))}
-.pb-fill.b{background:linear-gradient(90deg,var(--c2),var(--c4))}
-.pb-fill.c{background:linear-gradient(90deg,var(--c3),var(--c1))}
-
-/* PROJECTS */
-.proj-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:22px}
-.proj-card{background:var(--glass);border:1px solid var(--border);border-radius:16px;overflow:hidden;position:relative;transition:all .4s;transform-style:preserve-3d;cursor:none}
-.proj-card::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(0,245,255,0.045),transparent 55%);opacity:0;transition:opacity .4s;z-index:0;pointer-events:none}
-.proj-card:hover{border-color:rgba(0,245,255,0.28);box-shadow:0 28px 64px rgba(0,0,0,.55),var(--glow1)}
-.proj-card:hover::before{opacity:1}
-.pc-top{padding:24px 24px 0;position:relative;z-index:1}
-.pc-tr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
-.pc-badge{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:3px;padding:4px 11px;border-radius:20px}
-.pc-badge.ai{background:rgba(139,47,255,0.14);border:1px solid rgba(139,47,255,0.28);color:var(--c2)}
-.pc-badge.net{background:rgba(0,245,255,0.07);border:1px solid rgba(0,245,255,0.2);color:var(--c1)}
-.pc-badge.vapt{background:rgba(0,255,157,0.07);border:1px solid rgba(0,255,157,0.2);color:var(--c3)}
-.pc-num{font-family:'Bebas Neue',sans-serif;font-size:54px;color:rgba(0,245,255,0.04);line-height:1}
-.pc-title{font-size:18px;font-weight:700;line-height:1.3;margin-bottom:9px}
-.pc-desc{font-size:13px;line-height:1.8;color:rgba(216,232,255,.48);margin-bottom:14px}
-.pc-techs{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px}
-.pc-tech{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1px;padding:3px 9px;background:rgba(139,47,255,0.07);border:1px solid rgba(139,47,255,0.17);color:var(--c2);border-radius:3px}
-.pc-hi{list-style:none;margin-bottom:16px}
-.pc-hi li{font-size:12px;color:rgba(216,232,255,.42);padding:3px 0 3px 15px;position:relative;line-height:1.6}
-.pc-hi li::before{content:'▹';position:absolute;left:0;color:var(--c1);font-size:10px;top:3px}
-.pc-foot{padding:13px 24px 20px;border-top:1px solid var(--border);display:flex;align-items:center;gap:8px;position:relative;z-index:1;flex-wrap:wrap}
-.pl{display:inline-flex;align-items:center;gap:5px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;padding:7px 13px;border-radius:4px;text-decoration:none;transition:all .3s;cursor:none}
-.pl.gh{border:1px solid rgba(0,245,255,0.18);color:var(--c1)}
-.pl.gh:hover{background:rgba(0,245,255,0.07);border-color:var(--c1);transform:translateY(-2px);box-shadow:var(--glow1)}
-.pl.rp{border:1px solid rgba(139,47,255,0.2);color:var(--c2)}
-.pl.rp:hover{background:rgba(139,47,255,0.07);border-color:var(--c2);transform:translateY(-2px);box-shadow:var(--glow2)}
-.pl.lv{border:1px solid rgba(0,255,157,0.2);color:var(--c3)}
-.pl.lv:hover{background:rgba(0,255,157,0.07);border-color:var(--c3);transform:translateY(-2px);box-shadow:var(--glow3)}
-.pl svg{width:11px;height:11px;fill:currentColor;flex-shrink:0}
-.ps{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--c3);display:flex;align-items:center;gap:5px}
-.ps::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--c3);box-shadow:0 0 6px var(--c3);animation:pulse 2s infinite}
-
-/* RESEARCH */
-#research{background:linear-gradient(180deg,transparent,rgba(20,0,50,.12) 50%,transparent)}
-.res-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
-.res-card{background:var(--glass);border:1px solid var(--borderp);border-radius:14px;padding:28px;position:relative;overflow:hidden;transition:all .35s}
-.res-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--c2),transparent);transform:scaleX(0);transition:transform .45s}
-.res-card::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,rgba(139,47,255,0.07),transparent 70%);opacity:0;transition:opacity .35s;pointer-events:none}
-.res-card:hover{transform:translateY(-6px);border-color:rgba(139,47,255,0.4);box-shadow:0 24px 56px rgba(0,0,0,.5),var(--glow2)}
-.res-card:hover::before{transform:scaleX(1)}
-.res-card:hover::after{opacity:1}
-.res-type{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:3px;padding:5px 13px;border-radius:20px;background:rgba(139,47,255,0.12);border:1px solid rgba(139,47,255,0.25);color:var(--c2);display:inline-block;margin-bottom:16px}
-.res-icon{font-size:28px;margin-bottom:12px;display:block}
-.res-title{font-size:15px;font-weight:600;line-height:1.55;margin-bottom:10px;color:var(--txt)}
-.res-meta{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);line-height:1.6}
-.res-desc{font-size:13px;line-height:1.8;color:rgba(216,232,255,.42);margin-top:10px}
-.res-a{display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--c1);text-decoration:none;margin-top:16px;padding:7px 14px;border:1px solid rgba(0,245,255,0.16);border-radius:4px;transition:all .3s;cursor:none}
-.res-a:hover{background:rgba(0,245,255,0.07);border-color:var(--c1);transform:translateY(-2px);box-shadow:var(--glow1)}
-.res-a svg{width:11px;height:11px;fill:currentColor}
-
-/* ACHIEVEMENTS */
-.ach-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:60px}
-.ach-card{background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:28px 18px;text-align:center;position:relative;overflow:hidden;transition:all .38s}
-.ach-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--c1),transparent);opacity:0;transition:opacity .35s}
-.ach-card::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 100%,rgba(0,245,255,0.05),transparent 70%);opacity:0;transition:opacity .35s;pointer-events:none}
-.ach-card:hover{transform:translateY(-8px);border-color:rgba(0,245,255,0.22);box-shadow:0 22px 52px rgba(0,0,0,.45),var(--glow1)}
-.ach-card:hover::before,.ach-card:hover::after{opacity:1}
-.ach-ic{font-size:26px;margin-bottom:12px;display:block}
-.ach-v{font-family:'Bebas Neue',sans-serif;font-size:40px;line-height:1;background:linear-gradient(135deg,var(--c1),var(--c2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.ach-l{font-size:13px;color:rgba(216,232,255,.55);margin-top:6px;line-height:1.5}
-.ach-s{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);margin-top:5px;letter-spacing:1px}
-
-/* EDU */
-.edu-certs{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start}
-.tl-wrap{position:relative;padding-left:28px}
-.tl-wrap::before{content:'';position:absolute;left:0;top:6px;bottom:6px;width:1px;background:linear-gradient(to bottom,var(--c1),rgba(0,245,255,.06))}
-.tl-item{position:relative;margin-bottom:38px}
-.tl-dot{position:absolute;left:-35px;top:4px;width:16px;height:16px;border-radius:50%;background:var(--bg);border:2px solid var(--c1);box-shadow:0 0 12px var(--c1),0 0 28px rgba(0,245,255,.15)}
-.tl-yr{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--c2);margin-bottom:5px}
-.tl-title{font-size:17px;font-weight:700;margin-bottom:3px}
-.tl-org{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:7px}
-.tl-desc{font-size:13px;color:rgba(216,232,255,.42);line-height:1.7}
-.certs-hd{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--c2);margin-bottom:20px}
-.cert-g{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.cert-c{background:rgba(139,47,255,.06);border:1px solid rgba(139,47,255,.15);border-radius:12px;padding:18px;text-align:center;transition:all .3s}
-.cert-c:hover{border-color:rgba(139,47,255,.35);transform:scale(1.04);background:rgba(139,47,255,.1);box-shadow:var(--glow2)}
-.cert-ic{font-size:22px;margin-bottom:8px}
-.cert-n{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--c2);margin-bottom:4px}
-.cert-s{font-size:11px;color:var(--muted)}
-
-/* CONTACT */
-#contact{text-align:center}
-.ct-wrap{max-width:680px;margin:0 auto}
-.ct-tag{display:inline-flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--c3);padding:8px 18px;border:1px solid rgba(0,255,157,0.18);background:rgba(0,255,157,0.04);border-radius:20px;margin-bottom:32px}
-.ct-tag::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--c3);box-shadow:0 0 10px var(--c3);animation:pulse 2s infinite}
-.ct-desc{font-size:15px;line-height:1.9;color:rgba(216,232,255,.5);margin-bottom:44px}
-.ct-links{display:flex;justify-content:center;flex-wrap:wrap;gap:14px;margin-bottom:52px}
-.ct-link{display:flex;align-items:center;gap:10px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--txt);text-decoration:none;padding:14px 24px;background:var(--glass);border:1px solid var(--border);backdrop-filter:blur(10px);transition:all .35s;clip-path:polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%)}
-.ct-link:hover{border-color:var(--c1);background:rgba(0,245,255,0.07);color:var(--c1);transform:translateY(-3px);box-shadow:var(--glow1)}
-.ct-link svg{width:15px;height:15px;fill:currentColor;flex-shrink:0}
-.ct-big{font-family:'Bebas Neue',sans-serif;font-size:clamp(36px,5.5vw,76px);letter-spacing:4px;line-height:1;background:linear-gradient(90deg,rgba(255,255,255,.06),rgba(0,245,255,.14),rgba(255,255,255,.06));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:32px}
-
-/* FOOTER */
-footer{position:relative;z-index:3;padding:28px 5%;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
-.ft-logo{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:5px;color:var(--c1)}
-.ft-c{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted)}
-.ft-links{display:flex;gap:20px}
-.ft-links a{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);text-decoration:none;letter-spacing:1px;transition:color .3s}
-.ft-links a:hover{color:var(--c1)}
-
-/* REVEAL ANIMATIONS — default visible, animated in */
-.reveal{opacity:0;transform:translateY(32px);transition:opacity .8s cubic-bezier(.16,1,.3,1),transform .8s cubic-bezier(.16,1,.3,1)}
-.reveal.visible{opacity:1;transform:none}
-.reveal-l{opacity:0;transform:translateX(-32px);transition:opacity .8s cubic-bezier(.16,1,.3,1),transform .8s cubic-bezier(.16,1,.3,1)}
-.reveal-l.visible{opacity:1;transform:none}
-.reveal-r{opacity:0;transform:translateX(32px);transition:opacity .8s cubic-bezier(.16,1,.3,1),transform .8s cubic-bezier(.16,1,.3,1)}
-.reveal-r.visible{opacity:1;transform:none}
-
-/* SECTION GLOW ACCENTS */
-#research::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:600px;background:radial-gradient(ellipse,rgba(139,47,255,0.04),transparent 70%);pointer-events:none;z-index:0}
-#achievements::before{content:'';position:absolute;top:20%;right:0;width:500px;height:500px;background:radial-gradient(ellipse,rgba(0,245,255,0.03),transparent 70%);pointer-events:none;z-index:0}
-
-/* RESPONSIVE */
-@media(max-width:1024px){
-  .hero-wrap{grid-template-columns:1fr}.h-terminal{display:none}
-  .about-g{grid-template-columns:1fr}.edu-certs{grid-template-columns:1fr;gap:40px}
-  .ach-grid{grid-template-columns:repeat(2,1fr)}
-  .sk-grid{grid-template-columns:repeat(2,1fr)}
-}
-@media(max-width:768px){
-  .n-links,.n-hire{display:none}.ham{display:flex}
-  section{padding:80px 5%}
-  .ach-grid{grid-template-columns:repeat(2,1fr)}
-  footer{flex-direction:column;text-align:center}
-  .ft-links{justify-content:center}
-  .h-nums{gap:20px}
-  .res-grid{grid-template-columns:1fr}
-}
-@media(max-width:480px){
-  .ach-grid{grid-template-columns:1fr 1fr}
-  .sk-grid{grid-template-columns:1fr}
-  .proj-grid{grid-template-columns:1fr}
-  .cert-g{grid-template-columns:1fr 1fr}
-}
-</style>
+<%- include('partials/head') %>
 </head>
 <body>
 
-<div id="loader">
-  <div class="ld-ring"></div>
-  <div class="ld-name" id="ldn">VEDANT SAREEN</div>
-  <div class="ld-role" id="ldr">CYBERSECURITY ENGINEER</div>
-  <div class="ld-bar"><div class="ld-bar-fill" id="ldbf"></div></div>
-  <div class="ld-pct" id="ldp">0%</div>
-  <div class="ld-msg" id="ldm">ESTABLISHING SECURE CHANNEL...</div>
-</div>
+<%- include('partials/preloader') %>
 
-<div id="cur"></div><div id="cur-r"></div>
-<canvas id="bg-c"></canvas>
-<div class="hex-bg"></div><div class="vign"></div><div class="noise"></div><div class="scanline"></div>
+<div id="cur"></div>
+<div id="cur-r"></div>
+<canvas id="bg"></canvas>
+<div class="vgn"></div>
+<div class="scl"></div>
 
-<div class="mob-overlay" id="mob">
-  <button class="mob-close" id="mcl">&#x2715;</button>
-  <a href="#about" onclick="closeMob()">ABOUT</a>
-  <a href="#skills" onclick="closeMob()">ARSENAL</a>
-  <a href="#projects" onclick="closeMob()">PROJECTS</a>
-  <a href="#research" onclick="closeMob()">RESEARCH</a>
-  <a href="#achievements" onclick="closeMob()">ACHIEVEMENTS</a>
-  <a href="#contact" onclick="closeMob()">CONTACT</a>
-</div>
+<%- include('partials/nav') %>
 
-<nav id="nav">
-  <a href="#" class="n-logo">VS<span>ETHICAL HACKER</span></a>
-  <ul class="n-links">
-    <li><a href="#about">ABOUT</a></li>
-    <li><a href="#skills">ARSENAL</a></li>
-    <li><a href="#projects">PROJECTS</a></li>
-    <li><a href="#research">RESEARCH</a></li>
-    <li><a href="#achievements">ACHIEVEMENTS</a></li>
-  </ul>
-  <a href="#contact" class="n-hire">CONTACT</a>
-  <button class="ham" id="ham"><span></span><span></span><span></span></button>
-</nav>
-
-<!-- ═══════════════════ HERO ═══════════════════ -->
+<!-- ══════════ HERO ══════════ -->
 <section id="hero">
-  <div class="hero-wrap">
-    <div class="hero-left">
-      <div class="h-tag"><i></i>AVAILABLE FOR ENGAGEMENTS &mdash; LUDHIANA, IN</div>
-      <h1 class="h-name"><span class="ln1">VEDANT</span><span class="ln2">SAREEN</span></h1>
-      <div class="h-typed"><span id="typed"></span><span class="bk">_</span></div>
-      <p class="h-desc">Cybersecurity undergraduate building <strong>20+ elite Python tools</strong>, engineering <strong>AI-driven security automation</strong> and executing penetration tests. <strong>Top 8% globally</strong> on TryHackMe. <strong>Patent-pending</strong> GenAI security model. Published author.</p>
+  <div class="h-inner">
+    <div>
+      <div class="h-status"><i></i>AVAILABLE FOR ENGAGEMENTS &mdash; LUDHIANA, IN</div>
+      <h1 class="h-name">
+        <span class="n1">VEDANT</span>
+        <span class="n2" id="gn">SAREEN</span>
+      </h1>
+      <div class="h-role"><span id="typed"></span><span class="cursor">_</span></div>
+      <p class="h-desc">Cybersecurity undergrad building <strong>20+ elite Python tools</strong> &amp; <strong>30 cyber modules</strong>. AI-driven security automation. <strong>Top 8% TryHackMe</strong> globally. <strong>Patent-pending</strong> GenAI model. Published author. <strong>Musician &amp; Mentor.</strong></p>
       <div class="h-btns">
-        <a href="#projects" class="btn s magnetic">VIEW ARSENAL</a>
-        <a href="#contact" class="btn o magnetic">INITIATE CONTACT</a>
-        <a href="https://github.com/CYBERSAREEN" target="_blank" class="btn o magnetic">GITHUB</a>
+        <a href="#projects" class="btn-p magnetic"><span>VIEW ARSENAL</span></a>
+        <a href="https://github.com/CYBERSAREEN" target="_blank" class="btn-o magnetic">GITHUB</a>
+        <a href="/resume/Vedant_Cybersecurity_Resume.pdf" target="_blank" class="btn-dl magnetic">⬇ RESUME</a>
+        <a href="#contact" class="btn-o magnetic">HIRE ME</a>
       </div>
-      <div class="h-nums">
-        <div class="hn"><div class="v" data-count="20">0</div><div class="l">TOOLS BUILT</div></div>
-        <div class="hn"><div class="v" data-count="30">0</div><div class="l">% SCAN SPEED &uarr;</div></div>
-        <div class="hn"><div class="v" data-count="8">0</div><div class="l">TOP % THM</div></div>
-        <div class="hn"><div class="v" data-count="48">0</div><div class="l">% DOC TIME &darr;</div></div>
+      <div class="h-stats">
+        <div class="stat"><div class="v" data-n="20" data-suffix="+">0</div><div class="l">TOOLS BUILT</div></div>
+        <div class="stat"><div class="v" data-n="30">0</div><div class="l">PY MODULES</div></div>
+        <div class="stat"><div class="v" data-n="8" data-suffix="%">0</div><div class="l">TOP&nbsp;THM</div></div>
+        <div class="stat"><div class="v" data-n="30" data-suffix="%">0</div><div class="l">SCAN&nbsp;TIME&nbsp;&darr;</div></div>
       </div>
     </div>
-    <div class="h-terminal">
-      <div class="tb"><div class="td"></div><div class="td"></div><div class="td"></div><span class="tt">~/ vedant &mdash; threat-profile.sh</span></div>
-      <div class="tbody">
+    <div class="term">
+      <div class="term-bar"><div class="dot"></div><div class="dot"></div><div class="dot"></div><span class="term-title">~/ threat-profile.sh</span></div>
+      <div class="term-body">
         <span class="tl"><span class="p">$ </span><span class="c">whoami</span></span>
         <span class="tl"><span class="k">&#x2192; </span><span class="v">vedant_sareen</span></span>
-        <span class="tl">&nbsp;</span>
-        <span class="tl"><span class="p">$ </span><span class="c">cat roles.txt</span></span>
-        <span class="tl"><span class="k">&#x2192; </span><span class="v">Penetration Tester</span></span>
-        <span class="tl"><span class="k">&#x2192; </span><span class="v2">AI Security Researcher</span></span>
-        <span class="tl"><span class="k">&#x2192; </span><span class="v">Python Tool Builder</span></span>
-        <span class="tl">&nbsp;</span>
+        <span class="tl dim">&nbsp;</span>
         <span class="tl"><span class="p">$ </span><span class="c">cat stats.json</span></span>
-        <span class="tl"><span class="k">  tools_built: </span><span class="v">20+</span></span>
-        <span class="tl"><span class="k">  tryhackme:   </span><span class="v">TOP 8%</span></span>
-        <span class="tl"><span class="k">  patent:      </span><span class="ok">FILED &#x2713;</span></span>
-        <span class="tl"><span class="k">  published:   </span><span class="ok">CHAPTER 14 &#x2713;</span></span>
-        <span class="tl"><span class="k">  cgpa:        </span><span class="v">7.78</span></span>
-        <span class="tl">&nbsp;</span>
-        <span class="tl"><span class="p">$ </span><span class="c">ping target.com</span></span>
-        <span class="tl"><span class="k">&#x2192; </span><span class="ok">ONLINE &mdash; READY TO ENGAGE &#x25cf;</span></span>
+        <span class="tl"><span class="k">  tools:      </span><span class="v">20+</span></span>
+        <span class="tl"><span class="k">  py_modules: </span><span class="v">30</span></span>
+        <span class="tl"><span class="k">  tryhackme:  </span><span class="v">TOP 8%</span></span>
+        <span class="tl"><span class="k">  patent:     </span><span class="ok">FILED &#x2713;</span></span>
+        <span class="tl"><span class="k">  chapter_14: </span><span class="ok">PUBLISHED &#x2713;</span></span>
+        <span class="tl"><span class="k">  ceh_labs:   </span><span class="ok">DOCUMENTED &#x2713;</span></span>
+        <span class="tl"><span class="k">  musician:   </span><span class="ok">ACTIVE &#x2713;</span></span>
+        <span class="tl"><span class="k">  cgpa:       </span><span class="v">7.78</span></span>
+        <span class="tl dim">&nbsp;</span>
+        <span class="tl"><span class="p">$ </span><span class="c">status</span></span>
+        <span class="tl"><span class="k">&#x2192; </span><span class="ok">READY TO ENGAGE &#x25cf;</span></span>
+        <span class="tl bl dim">&nbsp;</span>
       </div>
     </div>
   </div>
-  <div class="sc" id="scc"><div class="sc-ln"></div><span>SCROLL</span></div>
+  <div class="scroll-cue" id="sc"><div class="scroll-line"></div><span>SCROLL</span></div>
 </section>
 
-<!-- ═══════════════════ ABOUT ═══════════════════ -->
+<!-- ══════════ ABOUT ══════════ -->
 <section id="about">
-  <div class="reveal"><div class="sh">01 &mdash; IDENTITY</div><h2 class="st">THREAT <em>ARCHITECT</em></h2><div class="sd"></div></div>
-  <div class="about-g">
-    <div class="reveal-l">
-      <div class="a-card">
-        <div class="a-hd">OPERATOR PROFILE</div>
-        <div class="prow"><span class="pk">NAME</span><span class="pv">Vedant Sareen</span></div>
-        <div class="prow"><span class="pk">LOCATION</span><span class="pv">Ludhiana, Punjab, IN</span></div>
-        <div class="prow"><span class="pk">UNIVERSITY</span><span class="pv">Chitkara University</span></div>
-        <div class="prow"><span class="pk">DEGREE</span><span class="pv">BE CSE &mdash; Cybersecurity</span></div>
-        <div class="prow"><span class="pk">CGPA</span><span class="pv hi">7.78</span></div>
-        <div class="prow"><span class="pk">TRYHACKME</span><span class="pv hi">TOP 8% GLOBALLY</span></div>
-        <div class="prow"><span class="pk">PATENT</span><span class="pv hi2">FILED &mdash; PENDING</span></div>
-        <div class="prow"><span class="pk">PUBLICATION</span><span class="pv hi3">BOOK CHAPTER &#x2713;</span></div>
-        <div class="prow"><span class="pk">STATUS</span><span class="pv hi2">AVAILABLE</span></div>
+  <div class="rv"><div class="sec-tag">01 &mdash; IDENTITY</div><h2 class="sec-h">THREAT <em>ARCHITECT</em></h2><div class="sec-div"></div></div>
+  <div class="ab-grid">
+    <div class="rv-l">
+      <div class="ab-card">
+        <div class="ab-hd">OPERATOR PROFILE</div>
+        <div class="pr"><span class="pk">NAME</span><span class="pv">Vedant Sareen</span></div>
+        <div class="pr"><span class="pk">LOCATION</span><span class="pv">Ludhiana, Punjab, IN</span></div>
+        <div class="pr"><span class="pk">UNIVERSITY</span><span class="pv">Chitkara University</span></div>
+        <div class="pr"><span class="pk">DEGREE</span><span class="pv">BE CSE &mdash; Cybersecurity</span></div>
+        <div class="pr"><span class="pk">CGPA</span><span class="pv a1">7.78</span></div>
+        <div class="pr"><span class="pk">TRYHACKME</span><span class="pv a1">TOP 8% GLOBALLY</span></div>
+        <div class="pr"><span class="pk">PATENT</span><span class="pv a2">FILED &mdash; PENDING</span></div>
+        <div class="pr"><span class="pk">PUBLICATION</span><span class="pv a3">BOOK CHAPTER &#x2713;</span></div>
+        <div class="pr"><span class="pk">PY MODULES</span><span class="pv a1">30 BUILT</span></div>
+        <div class="pr"><span class="pk">MUSIC</span><span class="pv a3">MENTOR & JUDGE</span></div>
+        <div class="pr"><span class="pk">STATUS</span><span class="pv a2">AVAILABLE</span></div>
       </div>
     </div>
-    <div class="reveal-r">
-      <div class="a-text">
-        <p>I'm Vedant Sareen &mdash; a cybersecurity undergraduate who doesn't wait for graduation to build real things. I've engineered <strong>20+ production-grade Python security tools</strong>, reduced network scan times by 30% through multithreading, and built a GenAI model for vulnerability assessment that's now <strong>patent-pending</strong>.</p>
-        <p>My work spans the full attack surface &mdash; from ARP spoofing and DNS manipulation at the network layer, to AI-powered report automation at the intelligence layer. I don't just learn concepts; I <strong>deploy them, document them, and publish them</strong>. One book chapter in print. One research paper in progress. One patent filed.</p>
-        <p>If you're looking for someone who thinks offensively, builds autonomously, and ships results &mdash; you've found them.</p>
-        <div class="brag"><p>&#x1F3C6; <strong>Top 8% on TryHackMe</strong> globally &mdash; not from theory, but from grinding real machines. <strong>48% faster</strong> documentation via RAG automation. <strong>30% faster</strong> network scans via custom multithreaded tooling.</p></div>
-        <div class="chip-r">
-          <span class="chip">OFFENSIVE SECURITY</span><span class="chip">AI AUTOMATION</span><span class="chip">PYTHON EXPERT</span><span class="chip">VAPT</span><span class="chip">MALWARE ANALYSIS</span><span class="chip">DIGITAL FORENSICS</span><span class="chip">RAG SYSTEMS</span><span class="chip">OSINT</span>
+    <div class="rv-r">
+      <div class="ab-text">
+        <p>I'm Vedant Sareen &mdash; a cybersecurity undergraduate who doesn't wait for graduation to build real things. I've engineered <strong>20+ production-grade Python security tools</strong> and crafted <strong>30 Python modules</strong> purpose-built for cyber defense, cutting scan times by 30% through multithreading.</p>
+        <p>My work spans the full attack surface &mdash; ARP spoofing, DNS manipulation, AI-powered report automation. Built a GenAI model for vulnerability assessment that's now <strong>patent-pending</strong> (filed Dec 2025, Ref: UTI3812). Published a book chapter. Research paper in progress. <strong>I don't just study security &mdash; I deploy it.</strong></p>
+        <div class="highlight-box"><p>&#x1F3C6; <strong>Top 8% TryHackMe</strong> globally &mdash; grinding real machines, not theory. <strong>30% faster</strong> scans via multithreading. <strong>30 Python modules</strong> for offensive security. Beyond the terminal &mdash; active <strong>musician, mentor, and competition judge</strong> since 2019.</p></div>
+        <div class="tags">
+          <span class="tag">OFFENSIVE SECURITY</span><span class="tag">AI AUTOMATION</span><span class="tag">PYTHON EXPERT</span><span class="tag">VAPT</span><span class="tag">MALWARE ANALYSIS</span><span class="tag">DIGITAL FORENSICS</span><span class="tag">RAG SYSTEMS</span><span class="tag">OSINT</span><span class="tag">CEH PRACTICAL</span><span class="tag">MUSICIAN</span>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ═══════════════════ SKILLS ═══════════════════ -->
+<!-- ══════════ SKILLS ══════════ -->
 <section id="skills">
-  <div class="reveal"><div class="sh">02 &mdash; TECHNICAL ARSENAL</div><h2 class="st">COMBAT <em>STACK</em></h2><div class="sd"></div></div>
+  <div class="rv"><div class="sec-tag">02 &mdash; TECHNICAL ARSENAL</div><h2 class="sec-h">COMBAT <em>STACK</em></h2><div class="sec-div"></div></div>
   <div class="sk-grid">
-    <div class="sk-card reveal"><div class="sk-ic">&#x2694;&#xFE0F;</div><div class="sk-t">OFFENSIVE SECURITY</div><div class="sk-chips"><span class="sk-ch">Burp Suite</span><span class="sk-ch">Metasploit</span><span class="sk-ch">Nmap</span><span class="sk-ch">SQLMap</span><span class="sk-ch">Mimikatz</span><span class="sk-ch">Bettercap</span><span class="sk-ch">BeEF</span><span class="sk-ch">Aircrack-ng</span><span class="sk-ch">Hashcat</span><span class="sk-ch">Hydra</span><span class="sk-ch">OWASP ZAP</span><span class="sk-ch">Wfuzz</span></div></div>
-    <div class="sk-card reveal"><div class="sk-ic">&#x1F9E0;</div><div class="sk-t">AI &amp; AUTOMATION</div><div class="sk-chips"><span class="sk-ch">Python (Advanced)</span><span class="sk-ch">OpenAI API</span><span class="sk-ch">RAG Systems</span><span class="sk-ch">Multi-threading</span><span class="sk-ch">MySQL</span><span class="sk-ch">Bash</span><span class="sk-ch">PSEXEC</span><span class="sk-ch">Data Analysis</span></div></div>
-    <div class="sk-card reveal"><div class="sk-ic">&#x1F50D;</div><div class="sk-t">SIEM &amp; ANALYSIS</div><div class="sk-chips"><span class="sk-ch">Wireshark</span><span class="sk-ch">Snort</span><span class="sk-ch">ELK Stack</span><span class="sk-ch">IBM QRadar</span><span class="sk-ch">Nessus</span><span class="sk-ch">OSINT</span><span class="sk-ch">CyberChef</span></div></div>
-    <div class="sk-card reveal"><div class="sk-ic">&#x1F3D7;&#xFE0F;</div><div class="sk-t">FRAMEWORKS</div><div class="sk-chips"><span class="sk-ch">OWASP Top 10</span><span class="sk-ch">MITRE ATT&amp;CK</span><span class="sk-ch">CWE/CVE</span><span class="sk-ch">CVSS</span><span class="sk-ch">SHA/MD5</span><span class="sk-ch">SSL/TLS</span><span class="sk-ch">SAML</span><span class="sk-ch">SSH</span></div></div>
-    <div class="sk-card reveal"><div class="sk-ic">&#x1F4BB;</div><div class="sk-t">OPERATING SYSTEMS</div><div class="sk-chips"><span class="sk-ch">Kali Linux</span><span class="sk-ch">Ubuntu</span><span class="sk-ch">Tails OS</span><span class="sk-ch">Windows Internals</span><span class="sk-ch">macOS</span><span class="sk-ch">Priv Escalation</span></div></div>
-    <div class="sk-card reveal"><div class="sk-ic">&#x1F310;</div><div class="sk-t">NETWORKING</div><div class="sk-chips"><span class="sk-ch">TCP/IP</span><span class="sk-ch">DNS Resolution</span><span class="sk-ch">Packet Analysis</span><span class="sk-ch">HTTP/HTTPS</span><span class="sk-ch">Subnetting</span><span class="sk-ch">ARP Spoofing</span></div></div>
+    <div class="sk-card"><div class="sk-ic">&#x2694;&#xFE0F;</div><div class="sk-t">OFFENSIVE SECURITY</div><div class="sk-chips"><span class="sk-ch">Burp Suite</span><span class="sk-ch">Metasploit</span><span class="sk-ch">Nmap</span><span class="sk-ch">SQLMap</span><span class="sk-ch">Mimikatz</span><span class="sk-ch">Bettercap</span><span class="sk-ch">BeEF</span><span class="sk-ch">Aircrack-ng</span><span class="sk-ch">Hashcat</span><span class="sk-ch">Hydra</span><span class="sk-ch">OWASP ZAP</span><span class="sk-ch">Wfuzz</span><span class="sk-ch">Nikto</span><span class="sk-ch">Gobuster</span><span class="sk-ch">Dirsearch</span><span class="sk-ch">John the Ripper</span></div></div>
+    <div class="sk-card"><div class="sk-ic">&#x1F9E0;</div><div class="sk-t">AI &amp; AUTOMATION</div><div class="sk-chips"><span class="sk-ch">Python (25+ modules)</span><span class="sk-ch">OpenAI API</span><span class="sk-ch">RAG Systems</span><span class="sk-ch">Multi-threading</span><span class="sk-ch">MySQL</span><span class="sk-ch">Bash</span><span class="sk-ch">PSEXEC</span><span class="sk-ch">Data Analysis</span></div></div>
+    <div class="sk-card"><div class="sk-ic">&#x1F50D;</div><div class="sk-t">SIEM &amp; ANALYSIS</div><div class="sk-chips"><span class="sk-ch">Wireshark</span><span class="sk-ch">Snort</span><span class="sk-ch">ELK Stack</span><span class="sk-ch">IBM QRadar</span><span class="sk-ch">Nessus</span><span class="sk-ch">OSINT</span><span class="sk-ch">CyberChef</span></div></div>
+    <div class="sk-card"><div class="sk-ic">&#x1F3D7;&#xFE0F;</div><div class="sk-t">FRAMEWORKS &amp; CRYPTO</div><div class="sk-chips"><span class="sk-ch">OWASP Top 10</span><span class="sk-ch">MITRE ATT&amp;CK</span><span class="sk-ch">CWE/CVE</span><span class="sk-ch">CVSS</span><span class="sk-ch">SSL/TLS</span><span class="sk-ch">SHA/MD5</span><span class="sk-ch">SSH</span><span class="sk-ch">SAML</span></div></div>
+    <div class="sk-card"><div class="sk-ic">&#x1F4BB;</div><div class="sk-t">OPERATING SYSTEMS</div><div class="sk-chips"><span class="sk-ch">Kali Linux</span><span class="sk-ch">Ubuntu</span><span class="sk-ch">Tails OS</span><span class="sk-ch">Windows Internals</span><span class="sk-ch">macOS</span><span class="sk-ch">Priv Escalation</span></div></div>
+    <div class="sk-card"><div class="sk-ic">&#x1F310;</div><div class="sk-t">NETWORKING</div><div class="sk-chips"><span class="sk-ch">TCP/IP</span><span class="sk-ch">DNS Analysis</span><span class="sk-ch">Packet Analysis</span><span class="sk-ch">HTTP/HTTPS</span><span class="sk-ch">Subnetting</span><span class="sk-ch">ARP Spoofing</span><span class="sk-ch">Troubleshooting</span></div></div>
   </div>
-  <div class="prof-bars reveal" id="bars">
-    <div class="pb-title">PROFICIENCY MATRIX</div>
-    <div class="pb-row"><div class="pb-meta"><span class="pb-n">Python Security Tooling</span><span class="pb-p">95%</span></div><div class="pb-track"><div class="pb-fill a" data-w="95"></div></div></div>
-    <div class="pb-row"><div class="pb-meta"><span class="pb-n">Web Application Pentesting</span><span class="pb-p">90%</span></div><div class="pb-track"><div class="pb-fill a" data-w="90"></div></div></div>
-    <div class="pb-row"><div class="pb-meta"><span class="pb-n">Network Security &amp; Analysis</span><span class="pb-p">88%</span></div><div class="pb-track"><div class="pb-fill b" data-w="88"></div></div></div>
-    <div class="pb-row"><div class="pb-meta"><span class="pb-n">AI / ML Security Automation</span><span class="pb-p">82%</span></div><div class="pb-track"><div class="pb-fill c" data-w="82"></div></div></div>
-    <div class="pb-row"><div class="pb-meta"><span class="pb-n">SIEM &amp; Threat Detection</span><span class="pb-p">78%</span></div><div class="pb-track"><div class="pb-fill b" data-w="78"></div></div></div>
-    <div class="pb-row"><div class="pb-meta"><span class="pb-n">Malware Analysis &amp; Forensics</span><span class="pb-p">75%</span></div><div class="pb-track"><div class="pb-fill c" data-w="75"></div></div></div>
+  <div class="bars-wrap rv" id="bars">
+    <div class="bars-title">PROFICIENCY MATRIX</div>
+    <div class="bar-row"><div class="bar-meta"><span class="bar-n">Python Security Tooling</span><span class="bar-p">95%</span></div><div class="bar-t"><div class="bar-f a" data-w="95"></div></div></div>
+    <div class="bar-row"><div class="bar-meta"><span class="bar-n">Web Application Pentesting</span><span class="bar-p">90%</span></div><div class="bar-t"><div class="bar-f a" data-w="90"></div></div></div>
+    <div class="bar-row"><div class="bar-meta"><span class="bar-n">Network Security &amp; Analysis</span><span class="bar-p">88%</span></div><div class="bar-t"><div class="bar-f b" data-w="88"></div></div></div>
+    <div class="bar-row"><div class="bar-meta"><span class="bar-n">AI / ML Security Automation</span><span class="bar-p">82%</span></div><div class="bar-t"><div class="bar-f c" data-w="82"></div></div></div>
+    <div class="bar-row"><div class="bar-meta"><span class="bar-n">SIEM &amp; Threat Detection</span><span class="bar-p">78%</span></div><div class="bar-t"><div class="bar-f b" data-w="78"></div></div></div>
+    <div class="bar-row"><div class="bar-meta"><span class="bar-n">Malware Analysis &amp; Forensics</span><span class="bar-p">75%</span></div><div class="bar-t"><div class="bar-f c" data-w="75"></div></div></div>
   </div>
 </section>
 
-<!-- ═══════════════════ PROJECTS ═══════════════════ -->
+<!-- ══════════ PROJECTS ══════════ -->
 <section id="projects">
-  <div class="reveal"><div class="sh">03 &mdash; ACTIVE DEPLOYMENTS</div><h2 class="st">FIELD <em>OPERATIONS</em></h2><div class="sd"></div></div>
+  <div class="rv"><div class="sec-tag">03 &mdash; ACTIVE DEPLOYMENTS</div><h2 class="sec-h">FIELD <em>OPERATIONS</em></h2><div class="sec-div"></div></div>
   <div class="proj-grid">
-    <div class="proj-card reveal">
-      <div class="pc-top">
-        <div class="pc-tr"><span class="pc-badge ai">AI SECURITY</span><span class="pc-num">01</span></div>
-        <div class="pc-title">CyberXAgent &mdash; GenAI Security Model</div>
-        <div class="pc-desc">Patent-pending personalized GenAI model that automates the entire vulnerability assessment pipeline. Leverages RAG with recursive testing loops to generate comprehensive security reports in minutes, not hours.</div>
-        <div class="pc-techs"><span class="pc-tech">Python</span><span class="pc-tech">RAG</span><span class="pc-tech">OpenAI API</span><span class="pc-tech">OWASP LLM</span><span class="pc-tech">LangChain</span></div>
-        <ul class="pc-hi">
-          <li>48% reduction in manual documentation time via automated RAG pipeline</li>
-          <li>Integrated OWASP Top 10 + LLM-specific risk education platform</li>
-          <li>Patent filed November 2025 &mdash; currently pending approval</li>
-        </ul>
-      </div>
-      <div class="pc-foot">
-        <a href="https://github.com/CYBERSAREEN" target="_blank" class="pl gh"><svg viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>CODE</a>
-        <span class="ps">PATENT PENDING</span>
-      </div>
-    </div>
-    <div class="proj-card reveal">
-      <div class="pc-top">
-        <div class="pc-tr"><span class="pc-badge net">NETWORK SECURITY</span><span class="pc-num">02</span></div>
-        <div class="pc-title">Cybersecurity Tools Suite</div>
-        <div class="pc-desc">Portfolio of 20+ custom Python tools for network security testing. MAC Changer, Network Scanner, ARP Spoofer, DNS Spoofer and more &mdash; all multithreaded for maximum operational efficiency during assessments.</div>
+
+    <!-- 01 — CyberSecurityTools -->
+    <div class="pc">
+      <div class="pc-body">
+        <div class="pc-head"><span class="badge net">NETWORK SECURITY</span><span class="pc-num">01</span></div>
+        <div class="pc-title">CyberSecurityTools Suite</div>
+        <div class="pc-desc">20+ custom Python tools — MAC Changer, ARP Spoofer, DNS Spoofer, Network Scanner, all multithreaded for maximum efficiency.</div>
         <div class="pc-techs"><span class="pc-tech">Python</span><span class="pc-tech">Scapy</span><span class="pc-tech">Threading</span><span class="pc-tech">Nmap</span><span class="pc-tech">Socket</span></div>
-        <ul class="pc-hi">
-          <li>30% faster network scanning via multithreading optimization</li>
-          <li>20+ production-ready offensive security tools</li>
-          <li>CyberSecGuru, Ludhiana &mdash; March 2023 to Present</li>
-        </ul>
+        <ul class="pc-pts"><li>30% faster network scanning via multithreading</li><li>20+ production-ready offensive security tools</li><li>Active development since March 2023</li></ul>
       </div>
-      <div class="pc-foot">
-        <a href="https://github.com/CYBERSAREEN/CyberSecurityTools" target="_blank" class="pl gh"><svg viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>CODE</a>
-        <span class="ps">ACTIVE</span>
-      </div>
+      <div class="pc-foot"><a href="https://github.com/CYBERSAREEN/CyberSecurityTools" target="_blank" class="pl g"><svg viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>VIEW REPO</a><span class="ps live">ACTIVE</span></div>
     </div>
-    <div class="proj-card reveal">
-      <div class="pc-top">
-        <div class="pc-tr"><span class="pc-badge vapt">VAPT</span><span class="pc-num">03</span></div>
-        <div class="pc-title">DVWA + BWAPP Assessment Reports</div>
-        <div class="pc-desc">Comprehensive vulnerability assessment across all difficulty levels in BWAPP and DVWA. Full OWASP Top 10 coverage with validated PoC exploits, CVSS scoring, and professional remediation roadmaps.</div>
+
+    <!-- 02 — DVWA + BWAPP -->
+    <div class="pc">
+      <div class="pc-body">
+        <div class="pc-head"><span class="badge vp">VAPT</span><span class="pc-num">02</span></div>
+        <div class="pc-title">DVWA + BWAPP Reports &amp; PoC</div>
+        <div class="pc-desc">Comprehensive vulnerability assessments across all difficulty levels with validated PoC exploits, CVSS scoring, and remediation roadmaps.</div>
         <div class="pc-techs"><span class="pc-tech">DVWA</span><span class="pc-tech">bWAPP</span><span class="pc-tech">Burp Suite</span><span class="pc-tech">SQLMap</span><span class="pc-tech">OWASP</span></div>
-        <ul class="pc-hi">
-          <li>Full OWASP Top 10 coverage across all difficulty modes</li>
-          <li>CWE/CVE documented with CVSS scoring and TTP mapping</li>
-          <li>Validated PoC exploits with professional remediation reports</li>
-        </ul>
+        <ul class="pc-pts"><li>Full OWASP Top 10 coverage across all difficulty modes</li><li>CWE/CVE documented with CVSS scoring &amp; TTP mapping</li><li>Professional remediation reports included</li></ul>
       </div>
-      <div class="pc-foot">
-        <a href="https://github.com/CYBERSAREEN/Reports_DVWA_BWAP_With_TTP" target="_blank" class="pl gh"><svg viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>REPORTS</a>
-        <a href="https://github.com/CYBERSAREEN/research_paper" target="_blank" class="pl rp"><svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>RESEARCH</a>
-        <span class="ps">COMPLETE</span>
-      </div>
+      <div class="pc-foot"><a href="https://github.com/CYBERSAREEN/REPORTS_DVWA-BWAPP_POC" target="_blank" class="pl g"><svg viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>REPORTS</a><span class="ps done">COMPLETE</span></div>
     </div>
+
+    <!-- 03 — CEH Write-ups -->
+    <div class="pc">
+      <div class="pc-body">
+        <div class="pc-head"><span class="badge ce">CEH PRACTICAL</span><span class="pc-num">03</span></div>
+        <div class="pc-title">CEH V13 AI Lab Write-ups</div>
+        <div class="pc-desc">Detailed CEH V13 practical write-ups covering footprinting, scanning, system hacking, malware threats, sniffing and social engineering.</div>
+        <div class="pc-techs"><span class="pc-tech">CEH V13</span><span class="pc-tech">Kali Linux</span><span class="pc-tech">EC-Council</span><span class="pc-tech">Lab Env</span></div>
+        <ul class="pc-pts"><li>All CEH practical modules covered step-by-step</li><li>Methodology with analysis documented</li><li>Updated continuously with certification progress</li></ul>
+      </div>
+      <div class="pc-foot"><a href="https://github.com/CYBERSAREEN/CEH_WRITE-UP" target="_blank" class="pl g"><svg viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>WRITE-UPS</a><span class="ps prog">IN PROGRESS</span></div>
+    </div>
+
+    <!-- 04 — SORRY_SGPT -->
+    <div class="pc">
+      <div class="pc-body">
+        <div class="pc-head"><span class="badge ai">AI SECURITY</span><span class="pc-num">04</span></div>
+        <div class="pc-title">SORRY_SGPT &mdash; Custom AI Assistant</div>
+        <div class="pc-desc">When the CEH V13 SGPT subscription expired, I built my own. A custom GPT integration that replicates and extends the functionality with full control.</div>
+        <div class="pc-techs"><span class="pc-tech">Python</span><span class="pc-tech">OpenAI API</span><span class="pc-tech">CLI</span><span class="pc-tech">Prompt Engineering</span></div>
+        <ul class="pc-pts"><li>Replaced paid SGPT subscription with custom build</li><li>Full CEH V13 AI assistance functionality</li><li>Engineered for cybersecurity-specific queries</li></ul>
+      </div>
+      <div class="pc-foot"><a href="https://github.com/CYBERSAREEN/SORRY_SGPT" target="_blank" class="pl g"><svg viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>VIEW CODE</a><span class="ps live">ACTIVE</span></div>
+    </div>
+
+    <!-- 05 — PYHUB -->
+    <div class="pc">
+      <div class="pc-body">
+        <div class="pc-head"><span class="badge tool">DEVOPS TOOL</span><span class="pc-num">05</span></div>
+        <div class="pc-title">PYHUB &mdash; GitHub Deployer</div>
+        <div class="pc-desc">A Python-based GitHub deployer that pushes projects directly to GitHub — checks all installations, handles configs, and works with full impact.</div>
+        <div class="pc-techs"><span class="pc-tech">Python</span><span class="pc-tech">GitHub API</span><span class="pc-tech">CLI</span><span class="pc-tech">Automation</span></div>
+        <ul class="pc-pts"><li>One-command deployment to GitHub</li><li>Validates local Git setup and dependencies</li><li>Eliminates hours of repetitive DevOps work</li></ul>
+      </div>
+      <div class="pc-foot"><a href="https://github.com/CYBERSAREEN/PYHUB" target="_blank" class="pl g"><svg viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>VIEW TOOL</a><span class="ps live">ACTIVE</span></div>
+    </div>
+
+    <!-- 06 — XYBERDUMP -->
+    <div class="pc">
+      <div class="pc-body">
+        <div class="pc-head"><span class="badge kb">KNOWLEDGE BASE</span><span class="pc-num">06</span></div>
+        <div class="pc-title">XYBERDUMP &mdash; Cyber Knowledge Vault</div>
+        <div class="pc-desc">Massive knowledge dump containing practice modules, source code, CTF writeups, DBMS notes, interview questions, and cybersecurity coursework.</div>
+        <div class="pc-techs"><span class="pc-tech">CTFs</span><span class="pc-tech">Write-ups</span><span class="pc-tech">DBMS</span><span class="pc-tech">Source Code</span><span class="pc-tech">Notes</span></div>
+        <ul class="pc-pts"><li>Comprehensive cybersecurity study material</li><li>CTF solutions and practice walkthroughs</li><li>Interview prep and coursework references</li></ul>
+      </div>
+      <div class="pc-foot"><a href="https://github.com/CYBERSAREEN/XYBERDUMP" target="_blank" class="pl g"><svg viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>EXPLORE</a><span class="ps live">ACTIVE</span></div>
+    </div>
+
+    <!-- 07 — JWT Security Module -->
+    <div class="pc">
+      <div class="pc-body">
+        <div class="pc-head"><span class="badge ai">WEB SECURITY</span><span class="pc-num">07</span></div>
+        <div class="pc-title">JWT Learning Module &mdash; Interactive Lab</div>
+        <div class="pc-desc">Comprehensive interactive platform covering JWT fundamentals, OWASP Top 10, cookie stealing, session hijacking, JWT manipulation lab, and bcrypt hashing &mdash; with live exploit demos.</div>
+        <div class="pc-techs"><span class="pc-tech">JWT</span><span class="pc-tech">OWASP</span><span class="pc-tech">Express</span><span class="pc-tech">Bcrypt</span><span class="pc-tech">EJS</span><span class="pc-tech">PDFKit</span></div>
+        <ul class="pc-pts"><li>7 interactive modules with hands-on labs</li><li>Live cookie stealing &amp; session hijacking demos</li><li>Auto-generated PDF study notes</li></ul>
+      </div>
+      <div class="pc-foot"><a href="/jwt" class="pl g" style="background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.2);color:var(--c1)"><svg viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>LAUNCH APP</a><span class="ps live">LIVE</span></div>
+    </div>
+
+    <!-- 08 — WebCrawler -->
+    <div class="pc">
+      <div class="pc-body">
+        <div class="pc-head"><span class="badge net">RECON TOOL</span><span class="pc-num">08</span></div>
+        <div class="pc-title">CrawlerX &mdash; Web Reconnaissance Engine</div>
+        <div class="pc-desc">Elite web reconnaissance crawler with intelligent depth control, real-time SSE streaming, automated report generation (HTML, CSV, JSON), and downloadable ZIP archives.</div>
+        <div class="pc-techs"><span class="pc-tech">Axios</span><span class="pc-tech">Cheerio</span><span class="pc-tech">SSE</span><span class="pc-tech">Archiver</span><span class="pc-tech">Express</span></div>
+        <ul class="pc-pts"><li>Intelligent crawling with domain-lock &amp; depth control</li><li>Real-time event streaming via Server-Sent Events</li><li>Multi-format reports: HTML, CSV, JSON + ZIP download</li></ul>
+      </div>
+      <div class="pc-foot"><a href="/crawler" class="pl g" style="background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.2);color:var(--c1)"><svg viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>LAUNCH APP</a><span class="ps live">LIVE</span></div>
+    </div>
+
   </div>
 </section>
 
-<!-- ═══════════════════ RESEARCH ═══════════════════ -->
+<!-- ══════════ RESEARCH ══════════ -->
 <section id="research">
-  <div class="reveal"><div class="sh">04 &mdash; INTELLIGENCE LAYER</div><h2 class="st">RESEARCH &amp; <em>PUBLICATIONS</em></h2><div class="sd"></div></div>
+  <div class="rv"><div class="sec-tag">04 &mdash; INTELLIGENCE LAYER</div><h2 class="sec-h">RESEARCH &amp; <em>PUBLICATIONS</em></h2><div class="sec-div"></div></div>
   <div class="res-grid">
 
-    <div class="res-card reveal">
-      <span class="res-icon">&#x1F4DA;</span>
-      <span class="res-type">BOOK CHAPTER &mdash; PUBLISHED</span>
-      <div class="res-title">"Future Research Directions and Open Challenges" &mdash; Chapter 14</div>
-      <div class="res-meta">Cybersecurity in the Age of AI and IoT &mdash; June 2025</div>
-      <div class="res-desc">Authored chapter covering emerging attack vectors, open research problems, and future directions in AI-integrated cybersecurity defense systems. Published in peer-reviewed academic compilation.</div>
-      <a href="https://github.com/CYBERSAREEN/research_paper" target="_blank" class="res-a">
-        <svg viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
-        VIEW REPOSITORY
-      </a>
+    <div class="rc">
+      <span class="rc-ic">&#x1F4DA;</span>
+      <span class="rc-type">BOOK CHAPTER &mdash; PUBLISHED</span>
+      <div class="rc-title">"Future Research Directions and Open Challenges" &mdash; Chapter 14</div>
+      <div class="rc-meta">Cybersecurity in the Age of AI and IoT &mdash; June 2025</div>
+      <div class="rc-desc">Authored chapter on emerging attack vectors and future directions in AI-integrated cybersecurity. Published in peer-reviewed compilation.</div>
+      <a href="https://github.com/CYBERSAREEN/CHAPTER_14" target="_blank" class="rc-a"><svg viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>READ CHAPTER</a>
     </div>
 
-    <div class="res-card reveal">
-      <span class="res-icon">&#x1F4C4;</span>
-      <span class="res-type">RESEARCH PAPER &mdash; IN PROGRESS</span>
-      <div class="res-title">"Advances in Cyber Security &mdash; IoT and AI Based Solution Deployed by Cybersecurity"</div>
-      <div class="res-meta">Jan 2026 &mdash; Pursuing Publication</div>
-      <div class="res-desc">Deep-dive into convergence of IoT infrastructure vulnerabilities and AI-powered defense solutions. Examining automated threat detection pipelines and real-time anomaly classification in constrained environments.</div>
-      <a href="https://github.com/CYBERSAREEN/research_paper" target="_blank" class="res-a">
-        <svg viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
-        TRACK PROGRESS
-      </a>
+    <div class="rc">
+      <span class="rc-ic">&#x1F4C4;</span>
+      <span class="rc-type">RESEARCH PAPER &mdash; IN PROGRESS</span>
+      <div class="rc-title">"Advances in Cyber Security &mdash; IoT &amp; AI-Based Solutions"</div>
+      <div class="rc-meta">Jan 2026 &mdash; Pursuing Publication</div>
+      <div class="rc-desc">Deep-dive into IoT vulnerabilities and AI-powered defense. Automated threat detection pipelines and real-time anomaly classification.</div>
+      <a href="https://github.com/CYBERSAREEN/RESEARCH_PAPER" target="_blank" class="rc-a"><svg viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>TRACK PROGRESS</a>
     </div>
 
-    <div class="res-card reveal">
-      <span class="res-icon">&#x1F52C;</span>
-      <span class="res-type">PATENT &mdash; FILED &amp; PENDING</span>
-      <div class="res-title">CyberXAgent &mdash; AI-Driven Vulnerability Assessment Automation Model</div>
-      <div class="res-meta">Filed November 2025 &mdash; Awaiting Approval</div>
-      <div class="res-desc">Novel system for automating end-to-end vulnerability discovery, classification, and remediation reporting using recursive AI agents with OWASP-aligned output standardization. Patent application under active review.</div>
-      <a href="https://github.com/CYBERSAREEN" target="_blank" class="res-a">
-        <svg viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
-        GITHUB PROFILE
-      </a>
+    <div class="rc">
+      <span class="rc-ic">&#x1F52C;</span>
+      <span class="rc-type">PATENT &mdash; FILED &amp; PENDING</span>
+      <div class="rc-title">AI-Based Learning and Skill Assessment Platform for Cybersecurity</div>
+      <div class="rc-meta">Filed: Dec 2025 &mdash; Ref: UTI3812 | Patent Code: UPENBL260310-3812</div>
+      <div class="rc-desc">Co-inventor with Dr. Himanshi Babbar (Asst. Professor, CURIN). Novel system for automating vulnerability discovery using recursive AI agents with OWASP-aligned output standardization. Filed at Chitkara University, Rajpura.</div>
+      <a href="https://github.com/CYBERSAREEN" target="_blank" class="rc-a"><svg viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>GITHUB PROFILE</a>
     </div>
 
   </div>
 </section>
 
-<!-- ═══════════════════ ACHIEVEMENTS ═══════════════════ -->
+<!-- ══════════ ACHIEVEMENTS ══════════ -->
 <section id="achievements">
-  <div class="reveal"><div class="sh">05 &mdash; MISSION LOG</div><h2 class="st">ACHIEVEMENTS &amp; <em>EDUCATION</em></h2><div class="sd"></div></div>
-  <div class="ach-grid">
-    <div class="ach-card reveal"><span class="ach-ic">&#x1F3C6;</span><div class="ach-v">TOP 8%</div><div class="ach-l">TryHackMe Global Ranking</div><div class="ach-s">Ranked July 2025</div></div>
-    <div class="ach-card reveal"><span class="ach-ic">&#x1F4D6;</span><div class="ach-v">PUBLISHED</div><div class="ach-l">Book Chapter Author</div><div class="ach-s">AI &amp; IoT Cybersecurity &mdash; 2025</div></div>
-    <div class="ach-card reveal"><span class="ach-ic">&#x2697;&#xFE0F;</span><div class="ach-v">PATENT</div><div class="ach-l">Filed &amp; Pending</div><div class="ach-s">CyberXAgent &mdash; Nov 2025</div></div>
-    <div class="ach-card reveal"><span class="ach-ic">&#x1F6E0;&#xFE0F;</span><div class="ach-v">20+</div><div class="ach-l">Custom Security Tools</div><div class="ach-s">Python &mdash; Production Grade</div></div>
+  <div class="rv"><div class="sec-tag">05 &mdash; MISSION LOG</div><h2 class="sec-h">ACHIEVEMENTS &amp; <em>EDUCATION</em></h2><div class="sec-div"></div></div>
+  <div class="ach-cards">
+    <div class="ac"><span class="ac-ic">&#x1F3C6;</span><div class="ac-v">TOP 8%</div><div class="ac-l">TryHackMe Global Ranking</div><div class="ac-s">Ranked Jul 2025</div></div>
+    <div class="ac"><span class="ac-ic">&#x1F4D6;</span><div class="ac-v">PUBLISHED</div><div class="ac-l">Book Chapter Author</div><div class="ac-s">AI &amp; IoT Security 2025</div></div>
+    <div class="ac"><span class="ac-ic">&#x2697;&#xFE0F;</span><div class="ac-v">PATENT</div><div class="ac-l">Filed &amp; Pending</div><div class="ac-s">Dec 2025 &mdash; UTI3812</div></div>
+    <div class="ac"><span class="ac-ic">&#x1F6E0;&#xFE0F;</span><div class="ac-v">50+</div><div class="ac-l">Python Tools &amp; Modules</div><div class="ac-s">20 Tools + 30 Modules</div></div>
   </div>
   <div class="edu-certs">
-    <div class="reveal-l">
-      <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--c1);margin-bottom:28px">EDUCATION TIMELINE</div>
+    <div class="rv-l">
+      <div class="edu-label">EDUCATION TIMELINE</div>
       <div class="tl-wrap">
         <div class="tl-item">
           <div class="tl-dot"></div>
           <div class="tl-yr">MAY 2023 &mdash; AUG 2027</div>
-          <div class="tl-title">BE Computer Science (Cybersecurity)</div>
-          <div class="tl-org">Chitkara University, Rajpura</div>
-          <div class="tl-desc">CGPA: 7.78 | Specializing in offensive security, AI-driven automation and network defense. Building real tools while studying the theory.</div>
+          <div class="tl-t">BE Computer Science (Cybersecurity)</div>
+          <div class="tl-o">Chitkara University, Rajpura</div>
+          <div class="tl-d">CGPA 7.78 &mdash; Specializing in offensive security, AI automation, and network defense. Building real tools while studying theory.</div>
         </div>
         <div class="tl-item">
           <div class="tl-dot"></div>
           <div class="tl-yr">MARCH 2022 &mdash; 2023</div>
-          <div class="tl-title">Class XII &mdash; Non-Medical</div>
-          <div class="tl-org">BCM Arya Model School, Ludhiana</div>
-          <div class="tl-desc">Percentage: 76.5% | Foundation in mathematics and physics underpinning cryptographic and network understanding.</div>
+          <div class="tl-t">Class XII &mdash; Non-Medical</div>
+          <div class="tl-o">BCM Arya Model School, Ludhiana</div>
+          <div class="tl-d">76.5% &mdash; Foundation in mathematics and physics underpinning cryptographic and network understanding.</div>
         </div>
       </div>
     </div>
-    <div class="reveal-r">
-      <div class="certs-hd">CERTIFICATIONS</div>
-      <div class="cert-g">
-        <div class="cert-c"><div class="cert-ic">&#x1F393;</div><div class="cert-n">CEH V13 AI</div><div class="cert-s">EC-Council &mdash; In Progress</div></div>
-        <div class="cert-c"><div class="cert-ic">&#x2705;</div><div class="cert-n">ETHICAL HACKER</div><div class="cert-s">CyberSecGuru &mdash; Certified</div></div>
-        <div class="cert-c"><div class="cert-ic">&#x1F512;</div><div class="cert-n">OWASP TOP 10</div><div class="cert-s">Practical &mdash; Validated</div></div>
-        <div class="cert-c"><div class="cert-ic">&#x1F3B5;</div><div class="cert-n">MUSICIAN</div><div class="cert-s">Mentor &amp; Judge &mdash; 2019+</div></div>
+    <div class="rv-r">
+      <div class="certs-label">CERTIFICATIONS</div>
+      <div class="cert-grid">
+        <div class="cert"><div class="cert-ic">&#x1F393;</div><div class="cert-n">CEH V13 AI</div><div class="cert-s">EC-Council &mdash; In Progress</div></div>
+        <div class="cert"><div class="cert-ic">&#x2705;</div><div class="cert-n">ETHICAL HACKER</div><div class="cert-s">CyberSecGuru &mdash; Certified</div></div>
+        <div class="cert"><div class="cert-ic">&#x1F512;</div><div class="cert-n">OWASP TOP 10</div><div class="cert-s">Practical &mdash; Validated</div></div>
+        <div class="cert"><div class="cert-ic">&#x1F3B5;</div><div class="cert-n">MUSICIAN</div><div class="cert-s">Mentor &amp; Judge 2019+</div></div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ═══════════════════ CONTACT ═══════════════════ -->
-<section id="contact">
-  <div class="ct-wrap">
-    <div class="reveal"><div class="sh" style="justify-content:center">06 &mdash; ESTABLISH LINK</div><h2 class="st" style="text-align:center">OPEN <em>CHANNEL</em></h2><div class="sd" style="margin:12px auto 40px"></div></div>
-    <div class="ct-tag reveal">AVAILABLE FOR PENTESTING ENGAGEMENTS &amp; COLLABORATIONS</div>
-    <p class="ct-desc reveal">Whether you need a skilled ethical hacker, a Python security tool builder, or a researcher pushing the boundaries of AI-driven security &mdash; let's connect and build something formidable.</p>
-    <div class="ct-links reveal">
-      <a href="mailto:securecybernetics@gmail.com" class="ct-link magnetic"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>EMAIL ME</a>
-      <a href="https://linkedin.com/in/sareen-cybersecurity-477180ved" target="_blank" class="ct-link magnetic"><svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>LINKEDIN</a>
-      <a href="https://github.com/CYBERSAREEN" target="_blank" class="ct-link magnetic"><svg viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>GITHUB</a>
-      <a href="tel:+917087603933" class="ct-link magnetic"><svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>+91 70876 03933</a>
+<!-- ══════════ RESUME ══════════ -->
+<section id="resume">
+  <div class="rv"><div class="sec-tag">06 &mdash; CREDENTIALS</div><h2 class="sec-h">DOWNLOAD <em>RESUME</em></h2><div class="sec-div"></div></div>
+  <div class="resume-grid">
+    <div class="resume-card">
+      <span class="resume-ic">🛡️</span>
+      <div class="resume-title">Cybersecurity Resume</div>
+      <div class="resume-desc">Full professional resume covering offensive security expertise, Python tooling, VAPT experience, certifications, patent details, and academic background.</div>
+      <div class="resume-btns">
+        <a href="/resume/Vedant_Cybersecurity_Resume.pdf" target="_blank" class="btn-p magnetic"><span>⬇ DOWNLOAD PDF</span></a>
+        <a href="https://www.linkedin.com/in/sareen-cybersecurity-477180ved/" target="_blank" class="btn-o magnetic">LINKEDIN</a>
+      </div>
     </div>
-    <div class="ct-big reveal">LET'S BUILD SOMETHING UNBREAKABLE</div>
+    <div class="resume-card">
+      <span class="resume-ic">🎵</span>
+      <div class="resume-title">Musician Resume</div>
+      <div class="resume-desc">Musical portfolio resume showcasing performance history, mentorship experience, competition judging, and multi-instrument proficiency.</div>
+      <div class="resume-btns">
+        <a href="/resume/Vedant_Musician_Resume.pdf" target="_blank" class="btn-p magnetic" style="background:linear-gradient(135deg,var(--c6),var(--c4))"><span>⬇ DOWNLOAD PDF</span></a>
+        <a href="#" data-music-open class="btn-o magnetic" style="border-color:rgba(255,107,53,0.3);color:var(--c6)">🎵 EXPLORE</a>
+      </div>
+    </div>
   </div>
 </section>
 
-<footer>
-  <span class="ft-logo">VS</span>
-  <span class="ft-c">&copy; 2026 Vedant Sareen &mdash; Ludhiana, Punjab, IN</span>
-  <div class="ft-links">
-    <a href="https://github.com/CYBERSAREEN" target="_blank">GITHUB</a>
-    <a href="https://linkedin.com/in/sareen-cybersecurity-477180ved" target="_blank">LINKEDIN</a>
-    <a href="mailto:securecybernetics@gmail.com">EMAIL</a>
+<!-- ══════════ CONTACT ══════════ -->
+<section id="contact">
+  <div class="ct-wrap">
+    <div class="rv"><div class="sec-tag" style="justify-content:center">07 &mdash; ESTABLISH LINK</div><h2 class="sec-h" style="text-align:center">OPEN <em>CHANNEL</em></h2><div class="sec-div" style="margin:14px auto 36px"></div></div>
+    <div class="ct-avail">AVAILABLE FOR PENTESTING &amp; COLLABORATIONS</div>
+    <p class="ct-p">Need a skilled ethical hacker, a Python tool builder, or an AI-security researcher? Let's build something formidable.</p>
+    <div class="ct-links">
+      <a href="mailto:securecybernetics@gmail.com" class="ct-l magnetic"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>EMAIL ME</a>
+      <a href="https://www.linkedin.com/in/sareen-cybersecurity-477180ved/" target="_blank" class="ct-l magnetic"><svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>LINKEDIN</a>
+      <a href="https://github.com/CYBERSAREEN" target="_blank" class="ct-l magnetic"><svg viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>GITHUB</a>
+      <a href="https://tryhackme.com/p/V3D4N7S4R33N" target="_blank" class="ct-l magnetic"><svg viewBox="0 0 24 24"><path d="M10.705 0C7.54 0 4.902 2.285 4.349 5.291a4.525 4.525 0 00-4.107 4.5v4.893c0 2.503 2.025 4.529 4.529 4.529h.17c.75 2.779 3.301 4.787 6.29 4.787h1.538c2.988 0 5.54-2.008 6.29-4.787h.17c2.504 0 4.529-2.026 4.529-4.529V9.791a4.525 4.525 0 00-4.107-4.5C19.098 2.285 16.46 0 13.295 0h-2.59zM12 4.44l5.296 3.06v6.118L12 16.68l-5.296-3.062V7.5L12 4.44z"/></svg>TRYHACKME</a>
+      <a href="tel:+917087603933" class="ct-l magnetic"><svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>+91 70876 03933</a>
+    </div>
+    <div class="ct-big">LET'S BUILD SOMETHING UNBREAKABLE</div>
   </div>
-</footer>
+</section>
 
-<script>
-/* ═══════ PRELOADER ═══════ */
-(function(){
-  const fill=document.getElementById('ldbf'),
-        pct=document.getElementById('ldp'),
-        msg=document.getElementById('ldm'),
-        nm=document.getElementById('ldn'),
-        rl=document.getElementById('ldr');
-  const msgs=['ESTABLISHING SECURE CHANNEL...','LOADING THREAT MATRIX...','DECRYPTING PAYLOAD...','BYPASSING FIREWALL...','ACCESS GRANTED'];
-  let p=0,mi=0;
-  gsap.to(nm,{opacity:1,y:0,duration:.6,delay:.3});
-  gsap.to(rl,{opacity:1,duration:.5,delay:.6});
-  const iv=setInterval(()=>{
-    p+=Math.random()*7+2;
-    if(p>100)p=100;
-    fill.style.width=p+'%';
-    pct.textContent=Math.floor(p)+'%';
-    if(p>20&&mi===0){mi=1;msg.textContent=msgs[1]}
-    if(p>45&&mi===1){mi=2;msg.textContent=msgs[2]}
-    if(p>70&&mi===2){mi=3;msg.textContent=msgs[3]}
-    if(p>=100){
-      clearInterval(iv);
-      msg.textContent=msgs[4];
-      setTimeout(()=>{
-        gsap.to('#loader',{opacity:0,duration:.7,onComplete:()=>{
-          document.getElementById('loader').style.display='none';
-          startHero();
-        }});
-      },400);
-    }
-  },55);
-})();
+<%- include('partials/footer') %>
 
-/* ═══════ CANVAS PARTICLES ═══════ */
-(function(){
-  const c=document.getElementById('bg-c'),ctx=c.getContext('2d');
-  let W,H,pts=[];
-  function resize(){W=c.width=innerWidth;H=c.height=innerHeight}
-  resize();
-  addEventListener('resize',resize);
-  const COLS=['rgba(0,245,255,','rgba(139,47,255,','rgba(0,255,157,','rgba(255,255,255,'];
-  class P{
-    constructor(){this.reset()}
-    reset(){this.x=Math.random()*W;this.y=Math.random()*H;this.r=Math.random()*1.4+.2;this.vx=(Math.random()-.5)*.18;this.vy=(Math.random()-.5)*.18;this.a=Math.random()*.7;this.col=COLS[Math.floor(Math.random()*COLS.length)]}
-    update(){this.x+=this.vx;this.y+=this.vy;if(this.x<0||this.x>W||this.y<0||this.y>H)this.reset()}
-    draw(){ctx.beginPath();ctx.arc(this.x,this.y,this.r,0,Math.PI*2);ctx.fillStyle=this.col+this.a+')';ctx.fill()}
-  }
-  for(let i=0;i<200;i++)pts.push(new P());
-  let t=0;
-  function frame(){
-    ctx.clearRect(0,0,W,H);
-    t+=.0008;
-    const g=ctx.createRadialGradient(W/2+Math.sin(t)*100,H/2+Math.cos(t*.7)*80,0,W/2,H/2,W*.65);
-    g.addColorStop(0,'rgba(0,18,44,.3)');
-    g.addColorStop(.5,'rgba(5,0,18,.15)');
-    g.addColorStop(1,'transparent');
-    ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
-    pts.forEach(p=>{p.update();p.draw()});
-    for(let i=0;i<pts.length;i++){
-      for(let j=i+1;j<pts.length;j++){
-        const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.sqrt(dx*dx+dy*dy);
-        if(d<82){
-          ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);
-          ctx.strokeStyle='rgba(0,245,255,'+(0.024*(1-d/82))+')';ctx.lineWidth=.5;ctx.stroke();
-        }
-      }
-    }
-    requestAnimationFrame(frame);
-  }
-  frame();
-})();
-
-/* ═══════ CURSOR ═══════ */
-const cur=document.getElementById('cur'),curR=document.getElementById('cur-r');
-let mx=0,my=0,tx=0,ty=0;
-addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx+'px';cur.style.top=my+'px'});
-(function lp(){tx+=(mx-tx)*.11;ty+=(my-ty)*.11;curR.style.left=tx+'px';curR.style.top=ty+'px';requestAnimationFrame(lp)})();
-document.querySelectorAll('a,button,.magnetic,.proj-card,.sk-card,.ach-card,.res-card,.cert-c').forEach(el=>{
-  el.addEventListener('mouseenter',()=>document.body.classList.add('hov'));
-  el.addEventListener('mouseleave',()=>document.body.classList.remove('hov'));
-});
-
-/* ═══════ NAV SCROLL ═══════ */
-addEventListener('scroll',()=>{
-  document.getElementById('nav').classList.toggle('solid',scrollY>40);
-  ['about','skills','projects','research','achievements','contact'].forEach(id=>{
-    const el=document.getElementById(id);if(!el)return;
-    const lk=document.querySelector('.n-links a[href="#'+id+'"]');
-    if(lk)lk.classList.toggle('active',scrollY>=el.offsetTop-120&&scrollY<el.offsetTop+el.offsetHeight-120);
-  });
-});
-
-/* ═══════ MOBILE MENU ═══════ */
-document.getElementById('ham').addEventListener('click',()=>document.getElementById('mob').classList.add('open'));
-document.getElementById('mcl').addEventListener('click',()=>document.getElementById('mob').classList.remove('open'));
-function closeMob(){document.getElementById('mob').classList.remove('open')}
-
-/* ═══════ HERO INTRO ═══════ */
-function startHero(){
-  gsap.registerPlugin(ScrollTrigger);
-  const tl=gsap.timeline();
-  tl.to('.h-tag',{opacity:1,duration:.5,ease:'power2.out'})
-    .to('.h-name',{opacity:1,y:0,duration:1,ease:'power4.out'},'<.1')
-    .to('.h-typed',{opacity:1,duration:.5},'<.3')
-    .to('.h-desc',{opacity:1,duration:.6},'<.2')
-    .to('.h-btns',{opacity:1,duration:.5},'<.15')
-    .to('.h-nums',{opacity:1,duration:.5},'<.1')
-    .to('.h-terminal',{opacity:1,x:0,duration:.9,ease:'power3.out'},'<-.2')
-    .to('#scc',{opacity:1,duration:.5},'<.3');
-
-  setTimeout(typeInit,900);
-  setTimeout(countUp,1100);
-  initScrollAnims();
-}
-
-/* ═══════ TYPEWRITER ═══════ */
-const ROLES=['PENETRATION TESTER','AI SECURITY ENGINEER','PYTHON TOOL BUILDER','SECURITY RESEARCHER','ETHICAL HACKER'];
-let ri=0,ci=0,del=false;
-function typeInit(){tick()}
-function tick(){
-  const el=document.getElementById('typed'),w=ROLES[ri];
-  if(!del){
-    el.textContent=w.slice(0,++ci);
-    if(ci===w.length){del=true;setTimeout(tick,2000);return}
-  } else {
-    el.textContent=w.slice(0,--ci);
-    if(ci===0){del=false;ri=(ri+1)%ROLES.length}
-  }
-  setTimeout(tick,del?44:88);
-}
-
-/* ═══════ COUNTER ═══════ */
-function countUp(){
-  document.querySelectorAll('[data-count]').forEach(el=>{
-    const tgt=+el.dataset.count;let n=0;const step=tgt/60;
-    const iv=setInterval(()=>{
-      n=Math.min(n+step,tgt);
-      el.textContent=Math.floor(n)+(el.closest('.hn').querySelector('.l').textContent.includes('%')?'%':'');
-      if(n>=tgt)clearInterval(iv);
-    },28);
-  });
-}
-
-/* ═══════ SCROLL REVEAL — reliable IntersectionObserver ═══════ */
-function initScrollAnims(){
-  // IntersectionObserver for .reveal / .reveal-l / .reveal-r
-  const io=new IntersectionObserver(entries=>{
-    entries.forEach(e=>{
-      if(e.isIntersecting){
-        e.target.classList.add('visible');
-        io.unobserve(e.target);
-      }
-    });
-  },{threshold:0.05,rootMargin:'0px 0px -30px 0px'});
-
-  document.querySelectorAll('.reveal,.reveal-l,.reveal-r').forEach((el,i)=>{
-    // stagger via delay on transition
-    el.style.transitionDelay=(i*0.04)+'s';
-    io.observe(el);
-  });
-
-  // skill cards stagger
-  document.querySelectorAll('.sk-card').forEach((el,i)=>{
-    el.style.transitionDelay=(i*0.08)+'s';
-  });
-
-  // prof bars
-  const barObs=new IntersectionObserver(entries=>{
-    entries.forEach(e=>{
-      if(e.isIntersecting){
-        e.target.querySelectorAll('.pb-fill').forEach((b,i)=>{
-          setTimeout(()=>{b.style.width=b.dataset.w+'%'},i*130);
-        });
-        barObs.unobserve(e.target);
-      }
-    });
-  },{threshold:.2});
-  const bars=document.getElementById('bars');
-  if(bars)barObs.observe(bars);
-
-  // parallax hero name
-  gsap.to('.h-name',{yPercent:-15,ease:'none',scrollTrigger:{trigger:'#hero',start:'top top',end:'bottom top',scrub:true}});
-}
-
-/* ═══════ CARD INTERACTIONS ═══════ */
-document.querySelectorAll('.sk-card').forEach(card=>{
-  card.addEventListener('mousemove',e=>{
-    const r=card.getBoundingClientRect();
-    card.style.setProperty('--mx',(e.clientX-r.left)/r.width*100+'%');
-    card.style.setProperty('--my',(e.clientY-r.top)/r.height*100+'%');
-  });
-});
-
-document.querySelectorAll('.proj-card').forEach(card=>{
-  card.addEventListener('mousemove',e=>{
-    const r=card.getBoundingClientRect();
-    const x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;
-    card.style.transform='perspective(900px) rotateY('+(x*10)+'deg) rotateX('+(-y*10)+'deg) translateY(-6px)';
-    card.style.setProperty('--mx',(e.clientX-r.left)/r.width*100+'%');
-    card.style.setProperty('--my',(e.clientY-r.top)/r.height*100+'%');
-  });
-  card.addEventListener('mouseleave',()=>{card.style.transform='perspective(900px) rotateY(0) rotateX(0)'});
-});
-
-document.querySelectorAll('.magnetic').forEach(el=>{
-  el.addEventListener('mousemove',e=>{
-    const r=el.getBoundingClientRect();
-    el.style.transform='translate('+((e.clientX-r.left-r.width/2)*.3)+'px,'+((e.clientY-r.top-r.height/2)*.3)+'px)';
-  });
-  el.addEventListener('mouseleave',()=>{el.style.transform='translate(0,0)'});
-});
-
-/* ═══════ GLITCH EFFECT on hero name (subtle) ═══════ */
-(function(){
-  const nm=document.querySelector('.h-name');
-  if(!nm)return;
-  setInterval(()=>{
-    nm.style.textShadow='2px 0 rgba(0,245,255,.4),-2px 0 rgba(139,47,255,.4)';
-    setTimeout(()=>{nm.style.textShadow='none'},80);
-  },4000+Math.random()*3000);
-})();
-</script>
 </body>
 </html>

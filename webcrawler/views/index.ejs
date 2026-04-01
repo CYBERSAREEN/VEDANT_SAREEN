@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>CrawlerX — Elite Web Reconnaissance Engine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<style>
+:root{
+  --bg:#020509;--bg2:#060d1a;
+  --c1:#00f5ff;--c2:#8b2fff;--c3:#00ff9d;--c4:#ff2d6b;--c5:#ffb800;
+  --txt:#d8e8ff;--muted:#3a5478;
+  --glass:rgba(5,14,32,0.7);--glass2:rgba(8,20,48,0.5);
+  --border:rgba(0,245,255,0.09);--borderp:rgba(139,47,255,0.18);
+  --glow1:0 0 30px rgba(0,245,255,0.2),0 0 80px rgba(0,245,255,0.07);
+  --glow2:0 0 30px rgba(139,47,255,0.25),0 0 80px rgba(139,47,255,0.08);
+  --glow3:0 0 20px rgba(0,255,157,0.2);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--txt);font-family:'Space Grotesk',sans-serif;overflow-x:hidden;cursor:none;min-height:100vh}
+::selection{background:rgba(0,245,255,0.18);color:#fff}
+::-webkit-scrollbar{width:2px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:linear-gradient(var(--c1),var(--c2))}
+
+/* CURSOR */
+#cur{position:fixed;width:7px;height:7px;background:var(--c1);border-radius:50%;pointer-events:none;z-index:99999;transform:translate(-50%,-50%);mix-blend-mode:screen;box-shadow:0 0 10px var(--c1);transition:transform .08s,width .25s,height .25s,background .25s}
+#cur-r{position:fixed;width:30px;height:30px;border:1px solid rgba(0,245,255,0.35);border-radius:50%;pointer-events:none;z-index:99998;transform:translate(-50%,-50%);transition:width .3s,height .3s,border-color .3s,left .06s,top .06s}
+body.hov #cur{width:18px;height:18px;background:var(--c2);box-shadow:0 0 18px var(--c2)}
+body.hov #cur-r{width:52px;height:52px;border-color:rgba(139,47,255,0.45)}
+
+/* PRELOADER */
+#loader{position:fixed;inset:0;z-index:999999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;overflow:hidden;transition:opacity .8s}
+#loader::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,245,255,0.012) 3px,rgba(0,245,255,0.012) 4px)}
+.ld-ring{width:80px;height:80px;border:1px solid rgba(0,245,255,0.15);border-top:1px solid var(--c1);border-radius:50%;animation:spin 1.2s linear infinite;margin-bottom:32px;position:relative;box-shadow:0 0 20px rgba(0,245,255,0.1)}
+.ld-ring::after{content:'';position:absolute;inset:8px;border:1px solid rgba(139,47,255,0.2);border-bottom:1px solid var(--c2);border-radius:50%;animation:spin 1.8s linear infinite reverse}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ld-name{font-family:'Bebas Neue',sans-serif;font-size:clamp(28px,5vw,64px);letter-spacing:10px;background:linear-gradient(135deg,#fff,var(--c1),var(--c2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;opacity:0;transform:translateY(20px)}
+.ld-role{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:5px;color:var(--muted);margin-top:6px;opacity:0}
+.ld-bar{width:240px;height:1px;background:rgba(0,245,255,0.08);margin-top:40px;position:relative;overflow:hidden}
+.ld-bar-fill{height:100%;width:0;background:linear-gradient(90deg,var(--c1),var(--c2));position:relative;transition:width .3s}
+.ld-bar-fill::after{content:'';position:absolute;right:-1px;top:-2px;width:5px;height:5px;border-radius:50%;background:var(--c1);box-shadow:0 0 8px var(--c1)}
+.ld-pct{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--c1);margin-top:12px;letter-spacing:3px}
+.ld-msg{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);margin-top:6px;letter-spacing:2px;height:14px}
+
+/* BACKGROUNDS */
+.hex-bg{position:fixed;inset:0;z-index:1;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='104'%3E%3Cpath d='M30 69L2 52V18L30 0l28 18v34z' fill='none' stroke='rgba(0,245,255,0.025)' stroke-width='1'/%3E%3C/svg%3E");background-size:60px 104px}
+.vign{position:fixed;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse 75% 75% at 50% 50%,transparent 35%,rgba(2,5,9,0.75) 100%)}
+.noise{position:fixed;inset:0;z-index:2;pointer-events:none;opacity:0.018;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:128px}
+.scanline{position:fixed;inset:0;z-index:2;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.015) 2px,rgba(0,0,0,0.015) 4px)}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;height:64px;padding:0 5%;display:flex;align-items:center;justify-content:space-between;transition:all .4s}
+nav.solid{background:rgba(2,5,9,0.92);backdrop-filter:blur(24px);border-bottom:1px solid var(--border)}
+.n-logo{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:6px;background:linear-gradient(90deg,var(--c1),var(--c2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-decoration:none;position:relative}
+.n-logo span{position:absolute;left:0;top:calc(100% + 2px);font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:3px;color:var(--muted);white-space:nowrap;-webkit-text-fill-color:var(--muted)}
+.n-badge{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;padding:4px 10px;border:1px solid rgba(0,255,157,0.25);color:var(--c3);clip-path:polygon(5px 0,100% 0,calc(100% - 5px) 100%,0 100%)}
+
+/* HERO */
+#hero{min-height:100vh;display:grid;place-items:center;padding:80px 5% 60px;position:relative;z-index:3}
+.hero-inner{max-width:900px;width:100%;text-align:center}
+.h-badge{display:inline-flex;align-items:center;gap:10px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:4px;color:var(--c3);margin-bottom:24px;opacity:0}
+.h-badge i{width:7px;height:7px;border-radius:50%;background:var(--c3);box-shadow:0 0 10px var(--c3);animation:pulse 2s infinite;flex-shrink:0}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.5);opacity:.5}}
+.h-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(58px,10vw,130px);line-height:.88;letter-spacing:2px;opacity:0;transform:translateY(60px)}
+.h-title .t1{display:block;color:#fff}
+.h-title .t2{display:block;background:linear-gradient(90deg,var(--c1),var(--c2),var(--c4));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.h-sub{font-family:'JetBrains Mono',monospace;font-size:clamp(10px,1.3vw,13px);color:var(--muted);letter-spacing:3px;margin-top:20px;opacity:0}
+.h-desc{font-size:15px;line-height:1.9;color:rgba(216,232,255,.45);max-width:580px;margin:16px auto 0;opacity:0}
+
+/* FORM SECTION */
+#form-section{position:relative;z-index:3;padding:0 5% 80px}
+.form-card{max-width:860px;margin:0 auto;background:var(--glass);border:1px solid var(--border);backdrop-filter:blur(24px);border-radius:2px;overflow:hidden;position:relative}
+.form-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--c1),var(--c2),transparent)}
+.form-header{padding:28px 36px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px}
+.fh-dots{display:flex;gap:7px}
+.fh-dot{width:10px;height:10px;border-radius:50%}
+.fh-dot:nth-child(1){background:#ff5f57}
+.fh-dot:nth-child(2){background:#febc2e}
+.fh-dot:nth-child(3){background:#28c840}
+.fh-title{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:3px;color:var(--muted)}
+
+.form-body{padding:32px 36px}
+
+.url-row{display:flex;gap:12px;margin-bottom:28px}
+.url-input-wrap{flex:1;position:relative}
+.url-input-wrap::before{content:'https://';position:absolute;left:14px;top:50%;transform:translateY(-50%);font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);pointer-events:none}
+.url-input{width:100%;background:rgba(0,0,0,0.4);border:1px solid var(--border);color:var(--txt);font-family:'JetBrains Mono',monospace;font-size:13px;padding:14px 14px 14px 72px;outline:none;transition:border-color .3s,box-shadow .3s;cursor:none;clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)}
+.url-input::placeholder{color:var(--muted)}
+.url-input:focus{border-color:rgba(0,245,255,0.35);box-shadow:0 0 0 1px rgba(0,245,255,0.1)}
+
+.controls-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px}
+.ctrl-group{display:flex;flex-direction:column;gap:8px}
+.ctrl-label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--muted)}
+.ctrl-input,.ctrl-select{background:rgba(0,0,0,0.4);border:1px solid var(--border);color:var(--txt);font-family:'JetBrains Mono',monospace;font-size:12px;padding:10px 14px;outline:none;transition:border-color .3s;cursor:none;width:100%}
+.ctrl-input:focus,.ctrl-select:focus{border-color:rgba(0,245,255,0.35)}
+.ctrl-select option{background:var(--bg2)}
+input[type=range]{-webkit-appearance:none;width:100%;height:2px;background:rgba(0,245,255,0.15);outline:none;cursor:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--c1);box-shadow:0 0 8px var(--c1);cursor:none}
+.range-val{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--c1);margin-top:4px}
+
+.toggle-row{display:flex;align-items:center;gap:12px;margin-bottom:28px}
+.toggle{position:relative;width:40px;height:22px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;inset:0;background:rgba(0,245,255,0.08);border:1px solid var(--border);border-radius:11px;transition:.3s;cursor:none}
+.toggle-slider::before{content:'';position:absolute;left:3px;top:3px;width:14px;height:14px;border-radius:50%;background:var(--muted);transition:.3s}
+.toggle input:checked + .toggle-slider{background:rgba(0,245,255,0.15);border-color:rgba(0,245,255,0.4)}
+.toggle input:checked + .toggle-slider::before{transform:translateX(18px);background:var(--c1);box-shadow:0 0 8px var(--c1)}
+.toggle-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:2px}
+
+.btn-launch{width:100%;padding:16px;font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:6px;background:linear-gradient(135deg,var(--c1),var(--c2));color:#000;border:none;cursor:none;position:relative;overflow:hidden;transition:all .35s;clip-path:polygon(10px 0,100% 0,calc(100% - 10px) 100%,0 100%)}
+.btn-launch::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--c2),var(--c1),var(--c4));opacity:0;transition:opacity .4s}
+.btn-launch:hover::before{opacity:1}
+.btn-launch:hover{transform:translateY(-2px);box-shadow:var(--glow1)}
+.btn-launch:disabled{opacity:.5;transform:none}
+
+/* TERMINAL / LIVE FEED */
+#live-section{position:relative;z-index:3;padding:0 5% 80px;display:none}
+.terminal-card{max-width:860px;margin:0 auto;background:rgba(2,6,14,0.95);border:1px solid var(--border);border-radius:2px;overflow:hidden;position:relative}
+.terminal-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--c3),var(--c1),transparent)}
+.t-header{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;background:rgba(0,0,0,0.4);border-bottom:1px solid var(--border)}
+.t-dots{display:flex;gap:6px}
+.t-dot{width:9px;height:9px;border-radius:50%}
+.t-dot:nth-child(1){background:#ff5f57}.t-dot:nth-child(2){background:#febc2e}.t-dot:nth-child(3){background:#28c840}
+.t-title{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--muted)}
+.t-status{display:flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px}
+.t-status-dot{width:7px;height:7px;border-radius:50%;background:var(--c3);box-shadow:0 0 8px var(--c3);animation:pulse 1.5s infinite}
+.t-status-dot.done{background:var(--c1);animation:none;box-shadow:0 0 8px var(--c1)}
+.t-status-dot.err{background:var(--c4);animation:none;box-shadow:0 0 8px var(--c4)}
+
+.live-stats{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:var(--border);border-bottom:1px solid var(--border)}
+.stat-box{background:var(--bg2);padding:14px 10px;text-align:center}
+.stat-box .sv{font-family:'Bebas Neue',sans-serif;font-size:26px;background:linear-gradient(135deg,var(--c1),var(--c2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1}
+.stat-box .sl{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:2px;color:var(--muted);margin-top:3px}
+
+.t-feed{height:320px;overflow-y:auto;padding:16px 18px;font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.7;display:flex;flex-direction:column;gap:2px}
+.t-feed::-webkit-scrollbar{width:2px}
+.t-feed::-webkit-scrollbar-thumb{background:rgba(0,245,255,0.2)}
+
+.log-line{display:flex;gap:10px;opacity:0;animation:fadeInLog .25s ease forwards}
+@keyframes fadeInLog{to{opacity:1}}
+.log-ts{color:var(--muted);flex-shrink:0;font-size:9px;padding-top:1px}
+.log-type{flex-shrink:0;padding:0 6px;font-size:9px;letter-spacing:1px;clip-path:polygon(3px 0,100% 0,calc(100% - 3px) 100%,0 100%)}
+.log-type.crawl{background:rgba(0,245,255,0.12);color:var(--c1)}
+.log-type.found{background:rgba(0,255,157,0.12);color:var(--c3)}
+.log-type.err{background:rgba(255,45,107,0.12);color:var(--c4)}
+.log-type.info{background:rgba(139,47,255,0.12);color:var(--c2)}
+.log-type.done{background:rgba(255,184,0,0.12);color:var(--c5)}
+.log-msg{color:var(--txt);word-break:break-all;font-size:10px}
+.log-msg .hi{color:var(--c3)}
+.log-msg .url{color:rgba(0,245,255,0.6)}
+
+.t-progress{height:2px;background:rgba(0,245,255,0.08);position:relative;overflow:hidden}
+.t-progress-bar{height:100%;width:0;background:linear-gradient(90deg,var(--c1),var(--c2));transition:width .4s;position:relative}
+.t-progress-bar::after{content:'';position:absolute;right:0;top:-1px;width:4px;height:4px;border-radius:50%;background:var(--c1);box-shadow:0 0 6px var(--c1)}
+
+.t-footer{padding:12px 18px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border)}
+.btn-stop{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;padding:8px 18px;border:1px solid rgba(255,45,107,0.3);color:var(--c4);background:transparent;cursor:none;transition:all .3s;clip-path:polygon(5px 0,100% 0,calc(100% - 5px) 100%,0 100%)}
+.btn-stop:hover{background:rgba(255,45,107,0.08);box-shadow:0 0 20px rgba(255,45,107,0.15)}
+
+/* RESULTS SECTION */
+#results-section{position:relative;z-index:3;padding:0 5% 100px;display:none}
+.results-wrap{max-width:860px;margin:0 auto}
+.r-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.r-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(28px,4vw,48px);letter-spacing:3px;background:linear-gradient(90deg,var(--c1),var(--c2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+.r-summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px}
+.r-stat{background:var(--glass);border:1px solid var(--border);padding:20px;position:relative;overflow:hidden;clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%)}
+.r-stat::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--c1),transparent)}
+.r-stat .rv{font-family:'Bebas Neue',sans-serif;font-size:42px;line-height:1;background:linear-gradient(135deg,var(--c1),var(--c2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.r-stat .rl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);margin-top:4px}
+
+.tab-nav{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:24px;overflow-x:auto}
+.tab-btn{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;padding:12px 20px;background:transparent;border:none;color:var(--muted);cursor:none;transition:all .3s;border-bottom:2px solid transparent;white-space:nowrap;position:relative}
+.tab-btn:hover{color:var(--txt)}
+.tab-btn.active{color:var(--c1);border-bottom-color:var(--c1)}
+.tab-btn .cnt{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;background:rgba(0,245,255,0.12);border-radius:2px;font-size:9px;margin-left:8px;color:var(--c1)}
+
+.tab-content{display:none}
+.tab-content.active{display:block}
+
+/* DATA TABLE */
+.data-table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:1px}
+.data-table{width:100%;border-collapse:collapse;font-family:'JetBrains Mono',monospace;font-size:11px}
+.data-table th{background:rgba(0,0,0,0.5);padding:10px 14px;text-align:left;letter-spacing:2px;font-size:9px;color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap}
+.data-table td{padding:10px 14px;border-bottom:1px solid rgba(0,245,255,0.04);color:var(--txt);word-break:break-all;vertical-align:top}
+.data-table tr:hover td{background:rgba(0,245,255,0.02)}
+.data-table tr:last-child td{border-bottom:none}
+
+.conf-badge{display:inline-block;padding:2px 8px;font-size:8px;letter-spacing:1px;clip-path:polygon(3px 0,100% 0,calc(100% - 3px) 100%,0 100%)}
+.conf-high{background:rgba(0,255,157,0.12);color:var(--c3)}
+.conf-med{background:rgba(255,184,0,0.12);color:var(--c5)}
+.conf-low{background:rgba(139,47,255,0.12);color:var(--c2)}
+
+.type-badge{display:inline-block;padding:2px 8px;font-size:8px;letter-spacing:1px;clip-path:polygon(3px 0,100% 0,calc(100% - 3px) 100%,0 100%);background:rgba(0,245,255,0.08);color:var(--c1)}
+.int-badge{background:rgba(0,255,157,0.08);color:var(--c3)}
+.ext-badge{background:rgba(139,47,255,0.08);color:var(--c2)}
+
+/* DOWNLOAD SECTION */
+.dl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-top:24px}
+.dl-card{background:var(--glass);border:1px solid var(--border);padding:18px;display:flex;flex-direction:column;gap:10px;transition:all .3s;position:relative;overflow:hidden;clip-path:polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%);cursor:none}
+.dl-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--c2),transparent);opacity:0;transition:opacity .3s}
+.dl-card:hover::before{opacity:1}
+.dl-card:hover{border-color:var(--borderp);transform:translateY(-3px);box-shadow:var(--glow2)}
+.dl-card a{text-decoration:none;display:flex;flex-direction:column;gap:8px}
+.dl-icon{font-size:22px}
+.dl-name{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--c1)}
+.dl-desc{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:1px}
+.btn-dl-all{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:4px;padding:14px 32px;background:linear-gradient(135deg,var(--c2),var(--c1));color:#000;border:none;cursor:none;transition:all .3s;clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%);text-decoration:none;display:inline-block}
+.btn-dl-all:hover{opacity:.85;transform:translateY(-2px);box-shadow:var(--glow2)}
+
+.empty-state{text-align:center;padding:40px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:2px}
+
+/* FEATURE CARDS */
+.features{position:relative;z-index:3;padding:0 5% 80px}
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:860px;margin:0 auto}
+.feat-card{background:var(--glass);border:1px solid var(--border);padding:24px;position:relative;overflow:hidden;clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%);transition:all .3s}
+.feat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--c1),transparent);opacity:0;transition:opacity .3s}
+.feat-card:hover::before{opacity:1}
+.feat-card:hover{transform:translateY(-4px);box-shadow:var(--glow1)}
+.feat-icon{font-size:28px;margin-bottom:12px;display:block}
+.feat-title{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--c1);margin-bottom:8px}
+.feat-desc{font-size:12px;color:rgba(216,232,255,.45);line-height:1.7}
+
+/* DISCLAIMER */
+.disclaimer{max-width:860px;margin:0 auto 60px;padding:20px 28px;background:rgba(255,184,0,0.05);border:1px solid rgba(255,184,0,0.15);border-radius:1px;position:relative;z-index:3}
+.disc-title{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--c5);margin-bottom:8px}
+.disc-text{font-size:12px;color:rgba(216,232,255,.45);line-height:1.7}
+
+/* RESPONSIVE */
+@media(max-width:700px){
+  .controls-grid{grid-template-columns:1fr 1fr}
+  .live-stats{grid-template-columns:repeat(3,1fr)}
+  .r-summary-grid{grid-template-columns:repeat(2,1fr)}
+  .feat-grid{grid-template-columns:1fr}
+  .url-row{flex-direction:column}
+}
+@media(max-width:480px){
+  .controls-grid{grid-template-columns:1fr}
+  .r-summary-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div id="cur"></div>
+<div id="cur-r"></div>
+
+<!-- PRELOADER -->
+<div id="loader">
+  <div class="ld-ring"></div>
+  <div class="ld-name">CRAWLERX</div>
+  <div class="ld-role">ELITE RECONNAISSANCE ENGINE</div>
+  <div class="ld-bar"><div class="ld-bar-fill" id="ld-fill"></div></div>
+  <div class="ld-pct" id="ld-pct">0%</div>
+  <div class="ld-msg" id="ld-msg">INITIALIZING MODULES...</div>
+</div>
+
+<!-- BG -->
+<div class="hex-bg"></div>
+<div class="vign"></div>
+<div class="noise"></div>
+<div class="scanline"></div>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="/" class="n-logo">CRAWLERX<span>WEB RECONNAISSANCE ENGINE</span></a>
+  <div class="n-badge">EDU / AUTHORIZED USE ONLY</div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-inner">
+    <div class="h-badge">
+      <i></i>
+      CYBERSECURITY RECONNAISSANCE TOOL
+    </div>
+    <h1 class="h-title">
+      <span class="t1">CRAWLERX</span>
+      <span class="t2">RECON ENGINE</span>
+    </h1>
+    <p class="h-sub">INTELLIGENT — DEDUPLICATED — VALIDATED — ZERO FALSE POSITIVES</p>
+    <p class="h-desc">Advanced web reconnaissance crawler with smart email/phone validation, form fingerprinting, framework detection, and comprehensive CSV reports. Built for cybersecurity research.</p>
+  </div>
+</section>
+
+<!-- FORM -->
+<section id="form-section">
+  <div class="form-card">
+    <div class="form-header">
+      <div class="fh-dots"><div class="fh-dot"></div><div class="fh-dot"></div><div class="fh-dot"></div></div>
+      <div class="fh-title">crawlerx://target_configuration</div>
+    </div>
+    <div class="form-body">
+      <div class="url-row">
+        <div class="url-input-wrap">
+          <input type="text" class="url-input" id="target-url" placeholder="target.com" autocomplete="off" spellcheck="false"/>
+        </div>
+      </div>
+
+      <div class="controls-grid">
+        <div class="ctrl-group">
+          <div class="ctrl-label">CRAWL DEPTH</div>
+          <input type="range" id="depth-range" min="1" max="5" value="2" oninput="document.getElementById('depth-val').textContent=this.value">
+          <div class="range-val">DEPTH: <span id="depth-val">2</span></div>
+        </div>
+        <div class="ctrl-group">
+          <div class="ctrl-label">REQUEST DELAY (SEC)</div>
+          <input type="range" id="delay-range" min="0.1" max="3" step="0.1" value="0.5" oninput="document.getElementById('delay-val').textContent=parseFloat(this.value).toFixed(1)+'s'">
+          <div class="range-val" id="delay-val">DELAY: 0.5s</div>
+        </div>
+        <div class="ctrl-group">
+          <div class="ctrl-label">CRAWL SCOPE</div>
+          <select id="scope-select" class="ctrl-select">
+            <option value="true">SAME DOMAIN ONLY</option>
+            <option value="false">FOLLOW ALL LINKS</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="toggle-row">
+        <label class="toggle">
+          <input type="checkbox" id="stay-toggle" checked>
+          <span class="toggle-slider"></span>
+        </label>
+        <span class="toggle-label">STAY ON TARGET DOMAIN — Recommended for focused recon</span>
+      </div>
+
+      <button class="btn-launch" id="launch-btn" onclick="startCrawl()">
+        ▶ LAUNCH CRAWL
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features">
+  <div class="feat-grid">
+    <div class="feat-card">
+      <span class="feat-icon">🧠</span>
+      <div class="feat-title">SMART VALIDATION</div>
+      <div class="feat-desc">Multi-tier email/phone validation eliminates CSS values, port numbers, dates, and template placeholders from results.</div>
+    </div>
+    <div class="feat-card">
+      <span class="feat-icon">🎯</span>
+      <div class="feat-title">CONFIDENCE SCORING</div>
+      <div class="feat-desc">Every finding scored HIGH/MED/LOW based on source (mailto: link > schema > text pattern). Zero duplicates.</div>
+    </div>
+    <div class="feat-card">
+      <span class="feat-icon">📊</span>
+      <div class="feat-title">CSV + JSON REPORTS</div>
+      <div class="feat-desc">Generates 7 structured report files covering emails, phones, links, forms, pages, errors and summary data.</div>
+    </div>
+    <div class="feat-card">
+      <span class="feat-icon">🔍</span>
+      <div class="feat-title">FORM FINGERPRINTING</div>
+      <div class="feat-desc">Classifies forms as LOGIN, REGISTER, CONTACT, PAYMENT, UPLOAD etc. Flags password fields and file upload endpoints.</div>
+    </div>
+    <div class="feat-card">
+      <span class="feat-icon">⚡</span>
+      <div class="feat-title">FRAMEWORK DETECTION</div>
+      <div class="feat-desc">Identifies WordPress, Next.js, React, Angular, Vue, Laravel, Django, Shopify, Wix and more from HTML fingerprints.</div>
+    </div>
+    <div class="feat-card">
+      <span class="feat-icon">📡</span>
+      <div class="feat-title">LIVE STREAMING</div>
+      <div class="feat-desc">Real-time Server-Sent Events stream every discovery as it happens. Interactive terminal feed with color-coded events.</div>
+    </div>
+  </div>
+</section>
+
+<!-- DISCLAIMER -->
+<div class="disclaimer" style="padding-left:5%;padding-right:5%">
+  <div style="max-width:860px;margin:0 auto;background:rgba(255,184,0,0.05);border:1px solid rgba(255,184,0,0.15);padding:20px 28px;position:relative;z-index:3">
+    <div class="disc-title">⚠ AUTHORIZED USE ONLY</div>
+    <div class="disc-text">This tool is intended for educational purposes and authorized security testing only. Only crawl websites you own or have explicit written permission to test. Unauthorized crawling may violate computer crime laws. The authors assume no liability for misuse.</div>
+  </div>
+</div>
+
+<!-- LIVE TERMINAL -->
+<section id="live-section">
+  <div class="terminal-card">
+    <div class="t-header">
+      <div class="t-dots"><div class="t-dot"></div><div class="t-dot"></div><div class="t-dot"></div></div>
+      <div class="t-title" id="t-target">crawlerx://live_feed</div>
+      <div class="t-status"><div class="t-status-dot" id="t-dot"></div><span id="t-status-txt">SCANNING</span></div>
+    </div>
+    <div class="live-stats">
+      <div class="stat-box"><div class="sv" id="s-pages">0</div><div class="sl">PAGES</div></div>
+      <div class="stat-box"><div class="sv" id="s-emails">0</div><div class="sl">EMAILS</div></div>
+      <div class="stat-box"><div class="sv" id="s-phones">0</div><div class="sl">PHONES</div></div>
+      <div class="stat-box"><div class="sv" id="s-links">0</div><div class="sl">LINKS</div></div>
+      <div class="stat-box"><div class="sv" id="s-forms">0</div><div class="sl">FORMS</div></div>
+      <div class="stat-box"><div class="sv" id="s-errors">0</div><div class="sl">ERRORS</div></div>
+    </div>
+    <div class="t-progress"><div class="t-progress-bar" id="t-prog"></div></div>
+    <div class="t-feed" id="t-feed"></div>
+    <div class="t-footer">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted)">QUEUE: <span id="t-queue">0</span> | VISITED: <span id="t-visited">0</span></div>
+      <button class="btn-stop" id="stop-btn" onclick="stopCrawl()">■ STOP</button>
+    </div>
+  </div>
+</section>
+
+<!-- RESULTS -->
+<section id="results-section">
+  <div class="results-wrap">
+    <div class="r-header">
+      <div class="r-title">RECON RESULTS</div>
+      <a href="#" id="dl-all-btn" class="btn-dl-all" style="display:none">⬇ DOWNLOAD ALL</a>
+    </div>
+
+    <div class="r-summary-grid">
+      <div class="r-stat"><div class="rv" id="rs-pages">0</div><div class="rl">PAGES CRAWLED</div></div>
+      <div class="r-stat"><div class="rv" id="rs-emails">0</div><div class="rl">EMAILS (UNIQUE)</div></div>
+      <div class="r-stat"><div class="rv" id="rs-phones">0</div><div class="rl">PHONES (UNIQUE)</div></div>
+      <div class="r-stat"><div class="rv" id="rs-links">0</div><div class="rl">LINKS FOUND</div></div>
+      <div class="r-stat"><div class="rv" id="rs-forms">0</div><div class="rl">FORMS FOUND</div></div>
+      <div class="r-stat"><div class="rv" id="rs-time">0s</div><div class="rl">DURATION</div></div>
+    </div>
+
+    <div class="tab-nav">
+      <button class="tab-btn active" onclick="switchTab('emails', this)">EMAILS <span class="cnt" id="tc-emails">0</span></button>
+      <button class="tab-btn" onclick="switchTab('phones', this)">PHONES <span class="cnt" id="tc-phones">0</span></button>
+      <button class="tab-btn" onclick="switchTab('forms', this)">FORMS <span class="cnt" id="tc-forms">0</span></button>
+      <button class="tab-btn" onclick="switchTab('links', this)">LINKS <span class="cnt" id="tc-links">0</span></button>
+      <button class="tab-btn" onclick="switchTab('pages', this)">PAGES <span class="cnt" id="tc-pages">0</span></button>
+      <button class="tab-btn" onclick="switchTab('downloads', this)">REPORTS</button>
+    </div>
+
+    <div id="tab-emails" class="tab-content active">
+      <div class="data-table-wrap">
+        <table class="data-table">
+          <thead><tr><th>EMAIL ADDRESS</th><th>CONFIDENCE</th><th>FOUND ON</th></tr></thead>
+          <tbody id="tb-emails"><tr><td colspan="3" class="empty-state">NO DATA YET</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="tab-phones" class="tab-content">
+      <div class="data-table-wrap">
+        <table class="data-table">
+          <thead><tr><th>PHONE NUMBER</th><th>CONFIDENCE</th><th>FOUND ON</th></tr></thead>
+          <tbody id="tb-phones"><tr><td colspan="3" class="empty-state">NO DATA YET</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="tab-forms" class="tab-content">
+      <div class="data-table-wrap">
+        <table class="data-table">
+          <thead><tr><th>PAGE</th><th>TYPE</th><th>METHOD</th><th>ACTION</th><th>INPUTS</th><th>FLAGS</th></tr></thead>
+          <tbody id="tb-forms"><tr><td colspan="6" class="empty-state">NO DATA YET</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="tab-links" class="tab-content">
+      <div class="data-table-wrap">
+        <table class="data-table">
+          <thead><tr><th>URL</th><th>DOMAIN</th><th>TYPE</th><th>DEPTH</th></tr></thead>
+          <tbody id="tb-links"><tr><td colspan="4" class="empty-state">NO DATA YET</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="tab-pages" class="tab-content">
+      <div class="data-table-wrap">
+        <table class="data-table">
+          <thead><tr><th>URL</th><th>DEPTH</th><th>STATUS</th><th>TITLE</th><th>FRAMEWORK</th><th>EMAILS</th></tr></thead>
+          <tbody id="tb-pages"><tr><td colspan="6" class="empty-state">NO DATA YET</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="tab-downloads" class="tab-content">
+      <p style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:2px;margin-bottom:16px">GENERATED REPORT FILES</p>
+      <div class="dl-grid" id="dl-grid">
+        <div class="empty-state">REPORTS GENERATING...</div>
+      </div>
+      <div style="margin-top:24px;text-align:center">
+        <a href="#" id="dl-all-link" class="btn-dl-all">⬇ DOWNLOAD ALL AS ZIP</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+let sessionId = null;
+let eventSource = null;
+let stats = { pages: 0, emails: 0, phones: 0, links: 0, forms: 0, errors: 0 };
+let allResults = null;
+
+// ─── PRELOADER ────────────────────────────────────────────────────────────────
+const msgs = ['INITIALIZING MODULES...','LOADING VALIDATOR ENGINE...','COMPILING REGEX PATTERNS...','MOUNTING CRAWLER CORE...','CALIBRATING HEURISTICS...','SYSTEM READY'];
+let ldIdx = 0;
+const ldFill = document.getElementById('ld-fill');
+const ldPct = document.getElementById('ld-pct');
+const ldMsg = document.getElementById('ld-msg');
+
+function loaderTick() {
+  if (ldIdx >= msgs.length) return;
+  const pct = Math.round((ldIdx / (msgs.length - 1)) * 100);
+  ldFill.style.width = pct + '%';
+  ldPct.textContent = pct + '%';
+  ldMsg.textContent = msgs[ldIdx];
+  ldIdx++;
+  if (ldIdx < msgs.length) setTimeout(loaderTick, 280);
+}
+
+window.addEventListener('load', () => {
+  setTimeout(loaderTick, 200);
+  setTimeout(() => {
+    const loader = document.getElementById('loader');
+    loader.style.opacity = '0';
+    loader.style.pointerEvents = 'none';
+    setTimeout(() => { loader.style.display = 'none'; }, 800);
+    startHeroAnim();
+  }, msgs.length * 280 + 400);
+});
+
+// ─── HERO ANIMATION ──────────────────────────────────────────────────────────
+function startHeroAnim() {
+  gsap.registerPlugin(ScrollTrigger);
+  const tl = gsap.timeline();
+  tl.to('.h-badge', { opacity: 1, duration: .5, ease: 'power2.out' })
+    .to('.h-title', { opacity: 1, y: 0, duration: 1, ease: 'power4.out' }, '<.1')
+    .to('.h-sub', { opacity: 1, duration: .6 }, '<.3')
+    .to('.h-desc', { opacity: 1, duration: .6 }, '<.2');
+
+  document.querySelectorAll('.feat-card').forEach((el, i) => {
+    gsap.from(el, {
+      scrollTrigger: { trigger: el, start: 'top 85%' },
+      opacity: 0, y: 40, duration: .6, delay: i * 0.08, ease: 'power3.out'
+    });
+  });
+}
+
+// ─── CURSOR ───────────────────────────────────────────────────────────────────
+const cur = document.getElementById('cur');
+const curR = document.getElementById('cur-r');
+let mx = 0, my = 0, rx = 0, ry = 0;
+document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+(function animCursor() {
+  cur.style.left = mx + 'px'; cur.style.top = my + 'px';
+  rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12;
+  curR.style.left = rx + 'px'; curR.style.top = ry + 'px';
+  requestAnimationFrame(animCursor);
+})();
+document.querySelectorAll('a,button,input,select,label,.feat-card,.dl-card,.tab-btn').forEach(el => {
+  el.addEventListener('mouseenter', () => document.body.classList.add('hov'));
+  el.addEventListener('mouseleave', () => document.body.classList.remove('hov'));
+});
+
+// ─── NAV SCROLL ───────────────────────────────────────────────────────────────
+window.addEventListener('scroll', () => {
+  document.getElementById('nav').classList.toggle('solid', window.scrollY > 20);
+});
+
+// ─── TAB SWITCHING ────────────────────────────────────────────────────────────
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+}
+
+// ─── LOG LINE ─────────────────────────────────────────────────────────────────
+function addLog(type, msg, ts) {
+  const feed = document.getElementById('t-feed');
+  const time = new Date(ts || Date.now()).toLocaleTimeString('en-US', { hour12: false });
+  const line = document.createElement('div');
+  line.className = 'log-line';
+  line.innerHTML = `<span class="log-ts">${time}</span><span class="log-type ${type}">${type.toUpperCase()}</span><span class="log-msg">${msg}</span>`;
+  feed.appendChild(line);
+  feed.scrollTop = feed.scrollHeight;
+  // Limit DOM nodes
+  while (feed.children.length > 300) feed.removeChild(feed.firstChild);
+}
+
+// ─── START CRAWL ─────────────────────────────────────────────────────────────
+async function startCrawl() {
+  const url = document.getElementById('target-url').value.trim();
+  if (!url) { alert('Please enter a target URL'); return; }
+
+  const depth = document.getElementById('depth-range').value;
+  const delay = document.getElementById('delay-range').value;
+  const stayOnDomain = document.getElementById('stay-toggle').checked;
+
+  // Reset state
+  stats = { pages: 0, emails: 0, phones: 0, links: 0, forms: 0, errors: 0 };
+  allResults = null;
+  document.getElementById('t-feed').innerHTML = '';
+  Object.keys(stats).forEach(k => {
+    const el = document.getElementById('s-' + k);
+    if (el) el.textContent = '0';
+  });
+  document.getElementById('t-prog').style.width = '0%';
+
+  // Show live section
+  document.getElementById('live-section').style.display = 'block';
+  document.getElementById('results-section').style.display = 'none';
+  document.getElementById('t-target').textContent = 'crawlerx://' + url;
+  document.getElementById('t-dot').className = 't-status-dot';
+  document.getElementById('t-status-txt').textContent = 'SCANNING';
+  document.getElementById('launch-btn').disabled = true;
+
+  document.getElementById('live-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  try {
+    const resp = await fetch('crawl/start', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url, depth, delay, stayOnDomain: String(stayOnDomain) })
+    });
+    const data = await resp.json();
+    if (data.error) { addLog('err', data.error); return; }
+
+    sessionId = data.sessionId;
+    addLog('info', `Session started: <span class="hi">${sessionId.slice(0, 8)}</span>`, Date.now());
+    addLog('info', `Target: <span class="url">${url}</span> | Depth: ${depth} | Delay: ${delay}s`);
+
+    // Open SSE stream
+    if (eventSource) eventSource.close();
+    eventSource = new EventSource('crawl/stream/' + sessionId);
+
+    eventSource.onmessage = (e) => {
+      let ev;
+      try { ev = JSON.parse(e.data); } catch (_) { return; }
+      handleEvent(ev);
+    };
+
+    eventSource.onerror = () => {
+      eventSource.close();
+    };
+
+  } catch (err) {
+    addLog('err', 'Failed to start crawl: ' + err.message);
+    document.getElementById('launch-btn').disabled = false;
+  }
+}
+
+// ─── HANDLE SSE EVENTS ───────────────────────────────────────────────────────
+function handleEvent(ev) {
+  const { type, payload, ts } = ev;
+
+  switch (type) {
+    case 'start':
+      addLog('info', `Crawl started → max depth ${payload.maxDepth}`, ts);
+      break;
+
+    case 'crawling':
+      addLog('crawl', `[${payload.depth}/${payload.queue + payload.visited}] <span class="url">${truncate(payload.url, 70)}</span>`, ts);
+      document.getElementById('t-queue').textContent = payload.queue || 0;
+      document.getElementById('t-visited').textContent = payload.visited || 0;
+      stats.pages = payload.visited || 0;
+      document.getElementById('s-pages').textContent = stats.pages;
+      document.getElementById('rs-pages').textContent = stats.pages;
+      break;
+
+    case 'found':
+      if (payload.type === 'email') {
+        stats.emails++;
+        document.getElementById('s-emails').textContent = stats.emails;
+        document.getElementById('rs-emails').textContent = stats.emails;
+        document.getElementById('tc-emails').textContent = stats.emails;
+        addLog('found', `EMAIL: <span class="hi">${payload.value}</span> [${confidenceLabel(payload.confidence)}]`, ts);
+      } else if (payload.type === 'phone') {
+        stats.phones++;
+        document.getElementById('s-phones').textContent = stats.phones;
+        document.getElementById('rs-phones').textContent = stats.phones;
+        document.getElementById('tc-phones').textContent = stats.phones;
+        addLog('found', `PHONE: <span class="hi">${payload.value}</span> [${confidenceLabel(payload.confidence)}]`, ts);
+      }
+      break;
+
+    case 'pageError':
+      stats.errors++;
+      document.getElementById('s-errors').textContent = stats.errors;
+      addLog('err', `Error on <span class="url">${truncate(payload.url, 60)}</span>: ${payload.error}`, ts);
+      break;
+
+    case 'pageComplete':
+      stats.links += (payload.found?.links || 0);
+      stats.forms += (payload.found?.forms || 0);
+      document.getElementById('s-links').textContent = Object.keys(allResults?.links || {}).length || stats.links;
+      document.getElementById('s-forms').textContent = stats.forms;
+      document.getElementById('rs-forms').textContent = stats.forms;
+      document.getElementById('tc-forms').textContent = stats.forms;
+      if (payload.framework) {
+        addLog('info', `Framework detected: <span class="hi">${payload.framework}</span> on ${truncate(payload.url, 50)}`, ts);
+      }
+      break;
+
+    case 'stopped':
+      finalizeCrawl(payload);
+      addLog('done', 'CRAWL STOPPED BY USER', ts);
+      break;
+
+    case 'complete':
+      addLog('done', `CRAWL COMPLETE — ${payload.pagesVisited} pages | ${payload.emails} emails | ${payload.phones} phones | ${Math.round(payload.duration/1000)}s`, ts);
+      finalizeCrawl(payload);
+      break;
+
+    case 'reports_ready':
+      addLog('info', `Reports generated: ${payload.files.join(', ')}`, ts);
+      loadResults();
+      break;
+
+    case 'report_error':
+      addLog('err', 'Report generation failed: ' + payload.error, ts);
+      break;
+  }
+}
+
+function confidenceLabel(c) {
+  return c === 3 ? 'HIGH' : c === 2 ? 'MED' : 'LOW';
+}
+
+function truncate(str, n) {
+  if (!str) return '';
+  return str.length > n ? str.slice(0, n) + '…' : str;
+}
+
+function finalizeCrawl(summary) {
+  document.getElementById('launch-btn').disabled = false;
+  const dot = document.getElementById('t-dot');
+  dot.className = 't-status-dot done';
+  document.getElementById('t-status-txt').textContent = 'COMPLETE';
+  document.getElementById('t-prog').style.width = '100%';
+  if (summary) {
+    document.getElementById('rs-pages').textContent = summary.pagesVisited || 0;
+    document.getElementById('rs-emails').textContent = summary.emails || 0;
+    document.getElementById('rs-phones').textContent = summary.phones || 0;
+    document.getElementById('rs-links').textContent = summary.links || 0;
+    document.getElementById('rs-forms').textContent = summary.forms || 0;
+    const dur = Math.round((summary.duration || 0) / 1000);
+    document.getElementById('rs-time').textContent = dur + 's';
+  }
+  if (eventSource) { eventSource.close(); eventSource = null; }
+}
+
+// ─── STOP CRAWL ───────────────────────────────────────────────────────────────
+async function stopCrawl() {
+  if (!sessionId) return;
+  try {
+    await fetch('crawl/stop/' + sessionId, { method: 'POST' });
+    addLog('info', 'Stop signal sent to crawler', Date.now());
+  } catch (e) {
+    addLog('err', 'Could not send stop signal');
+  }
+}
+
+// ─── LOAD RESULTS ─────────────────────────────────────────────────────────────
+async function loadResults() {
+  if (!sessionId) return;
+  try {
+    const resp = await fetch('status/' + sessionId);
+    const data = await resp.json();
+
+    // Fetch full results from the server
+    const fullResp = await fetch('download/' + sessionId + '/full_results.json');
+    if (!fullResp.ok) return;
+    allResults = await fullResp.json();
+
+    renderResults(allResults);
+    setupDownloads();
+
+    document.getElementById('results-section').style.display = 'block';
+    setTimeout(() => {
+      document.getElementById('results-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 300);
+  } catch (e) {
+    console.error('Failed to load results:', e);
+  }
+}
+
+function renderResults(r) {
+  // Emails
+  const emailEntries = Object.entries(r.emails || {});
+  document.getElementById('tc-emails').textContent = emailEntries.length;
+  const emailTb = document.getElementById('tb-emails');
+  if (emailEntries.length === 0) {
+    emailTb.innerHTML = '<tr><td colspan="3" class="empty-state">NO EMAILS FOUND</td></tr>';
+  } else {
+    emailTb.innerHTML = emailEntries.sort((a,b) => b[1].confidence - a[1].confidence).map(([email, d]) => {
+      const cls = d.confidence === 3 ? 'conf-high' : d.confidence === 2 ? 'conf-med' : 'conf-low';
+      const lbl = d.confidence === 3 ? 'HIGH' : d.confidence === 2 ? 'MED' : 'LOW';
+      const srcs = (d.sources || []).length;
+      return `<tr><td style="color:var(--c3)">${email}</td><td><span class="conf-badge ${cls}">${lbl}</span></td><td style="color:var(--muted)">${srcs} page${srcs!==1?'s':''}</td></tr>`;
+    }).join('');
+  }
+
+  // Phones
+  const phoneEntries = Object.entries(r.phones || {});
+  document.getElementById('tc-phones').textContent = phoneEntries.length;
+  const phoneTb = document.getElementById('tb-phones');
+  if (phoneEntries.length === 0) {
+    phoneTb.innerHTML = '<tr><td colspan="3" class="empty-state">NO PHONES FOUND</td></tr>';
+  } else {
+    phoneTb.innerHTML = phoneEntries.sort((a,b) => b[1].confidence - a[1].confidence).map(([phone, d]) => {
+      const cls = d.confidence === 3 ? 'conf-high' : d.confidence === 2 ? 'conf-med' : 'conf-low';
+      const lbl = d.confidence === 3 ? 'HIGH' : d.confidence === 2 ? 'MED' : 'LOW';
+      return `<tr><td style="color:var(--c1)">${phone}</td><td><span class="conf-badge ${cls}">${lbl}</span></td><td style="color:var(--muted)">${(d.sources||[]).length} page(s)</td></tr>`;
+    }).join('');
+  }
+
+  // Forms
+  const forms = r.forms || [];
+  document.getElementById('tc-forms').textContent = forms.length;
+  const formTb = document.getElementById('tb-forms');
+  if (forms.length === 0) {
+    formTb.innerHTML = '<tr><td colspan="6" class="empty-state">NO FORMS FOUND</td></tr>';
+  } else {
+    formTb.innerHTML = forms.map(f =>
+      `<tr>
+        <td style="color:var(--muted);max-width:180px">${truncate(f.page, 40)}</td>
+        <td><span class="type-badge">${f.type}</span></td>
+        <td style="color:var(--c2)">${f.method}</td>
+        <td style="color:var(--muted)">${truncate(f.action, 30)}</td>
+        <td style="color:var(--c1)">${f.inputCount}</td>
+        <td>${f.hasPassword?'<span class="conf-badge conf-high">🔐 PASS</span>':''} ${f.hasFileUpload?'<span class="conf-badge conf-med">📤 FILE</span>':''}</td>
+      </tr>`
+    ).join('');
+  }
+
+  // Links
+  const linkEntries = Object.entries(r.links || {});
+  document.getElementById('tc-links').textContent = linkEntries.length;
+  const linkTb = document.getElementById('tb-links');
+  if (linkEntries.length === 0) {
+    linkTb.innerHTML = '<tr><td colspan="4" class="empty-state">NO LINKS FOUND</td></tr>';
+  } else {
+    linkTb.innerHTML = linkEntries.slice(0, 200).map(([url, d]) =>
+      `<tr>
+        <td style="max-width:300px"><a href="${url}" target="_blank" rel="noopener" style="color:var(--c1);text-decoration:none">${truncate(url, 60)}</a></td>
+        <td style="color:var(--muted)">${d.domain}</td>
+        <td><span class="${d.internal?'type-badge int-badge':'type-badge ext-badge'}">${d.internal?'INTERNAL':'EXTERNAL'}</span></td>
+        <td style="color:var(--muted)">${d.depth}</td>
+      </tr>`
+    ).join('') + (linkEntries.length > 200 ? `<tr><td colspan="4" class="empty-state">... and ${linkEntries.length - 200} more in download</td></tr>` : '');
+  }
+
+  // Pages
+  const pages = r.pages || [];
+  document.getElementById('tc-pages').textContent = pages.length;
+  const pageTb = document.getElementById('tb-pages');
+  if (pages.length === 0) {
+    pageTb.innerHTML = '<tr><td colspan="6" class="empty-state">NO PAGES</td></tr>';
+  } else {
+    pageTb.innerHTML = pages.map(p =>
+      `<tr>
+        <td style="max-width:220px"><a href="${p.url}" target="_blank" rel="noopener" style="color:var(--c1);text-decoration:none">${truncate(p.url,50)}</a></td>
+        <td style="color:var(--muted)">${p.depth}</td>
+        <td style="color:${p.status===200?'var(--c3)':'var(--c5)'}">${p.status}</td>
+        <td style="color:var(--txt)">${truncate(p.title||'—',30)}</td>
+        <td style="color:${p.framework?'var(--c2)':'var(--muted)'}">${p.framework||'—'}</td>
+        <td style="color:${p.emailsFound>0?'var(--c3)':'var(--muted)'}">${p.emailsFound}</td>
+      </tr>`
+    ).join('');
+  }
+
+  // Summary stats
+  document.getElementById('rs-links').textContent = linkEntries.length;
+  document.getElementById('rs-time').textContent = r.duration ? Math.round(r.duration/1000) + 's' : '—';
+}
+
+function setupDownloads() {
+  if (!sessionId) return;
+
+  const files = [
+    { name: 'summary.json', icon: '📋', desc: 'SUMMARY & STATS' },
+    { name: 'emails.csv', icon: '📧', desc: 'EMAIL ADDRESSES' },
+    { name: 'phones.csv', icon: '📞', desc: 'PHONE NUMBERS' },
+    { name: 'links.csv', icon: '🔗', desc: 'ALL LINKS' },
+    { name: 'forms.csv', icon: '📝', desc: 'FORMS DATA' },
+    { name: 'pages_crawled.csv', icon: '📄', desc: 'PAGES CRAWLED' },
+    { name: 'errors.csv', icon: '⚠️', desc: 'ERRORS LOG' },
+    { name: 'full_results.json', icon: '🗃️', desc: 'FULL RESULTS JSON' }
+  ];
+
+  const dlGrid = document.getElementById('dl-grid');
+  dlGrid.innerHTML = files.map(f =>
+    `<div class="dl-card">
+      <a href="/download/${sessionId}/${f.name}">
+        <span class="dl-icon">${f.icon}</span>
+        <span class="dl-name">${f.name}</span>
+        <span class="dl-desc">${f.desc}</span>
+      </a>
+    </div>`
+  ).join('');
+
+  const zipUrl = '/download/' + sessionId;
+  document.getElementById('dl-all-link').href = zipUrl;
+  const dlAllBtn = document.getElementById('dl-all-btn');
+  dlAllBtn.href = zipUrl;
+  dlAllBtn.style.display = 'inline-block';
+}
+</script>
+</body>
+</html>

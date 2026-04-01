@@ -1,0 +1,112 @@
+<%- include('partials/header') %>
+
+<!-- Hero Section -->
+<section class="hero fade-in">
+  <span class="hero__badge">🔐 XYBERDUMP Learning Platform</span>
+  <h1 class="hero__title">JWT & Web Security<br>Masterclass</h1>
+  <p class="hero__subtitle">Master JSON Web Tokens, OWASP Top 10, Cookie Security, Session Management, and Cryptographic Hashing — all with interactive labs and real exploit POCs.</p>
+</section>
+
+<!-- Stats -->
+<div class="container">
+  <div class="stats stagger">
+    <div class="stat">
+      <div class="stat__value">7</div>
+      <div class="stat__label">Modules</div>
+    </div>
+    <div class="stat">
+      <div class="stat__value">10</div>
+      <div class="stat__label">OWASP Vulns</div>
+    </div>
+    <div class="stat">
+      <div class="stat__value">5+</div>
+      <div class="stat__label">Live Labs</div>
+    </div>
+    <div class="stat">
+      <div class="stat__value">∞</div>
+      <div class="stat__label">POC Exploits</div>
+    </div>
+  </div>
+</div>
+
+<!-- Module Cards -->
+<div class="cards stagger" style="margin-top: 32px;">
+  <a href="/jwt/jwt-fundamentals" class="card" id="card-jwt">
+    <span class="card__icon">🔑</span>
+    <h2 class="card__title">JWT Fundamentals</h2>
+    <p class="card__desc">Deep dive into JSON Web Tokens — structure, algorithms (HS256, RS256, ES256), token entropy, static vs dynamic tokens, and complete authentication workflow.</p>
+    <div class="card__tags">
+      <span class="card__tag card__tag--green">Core Concept</span>
+      <span class="card__tag card__tag--blue">Algorithms</span>
+      <span class="card__tag card__tag--orange">Entropy</span>
+    </div>
+  </a>
+
+  <a href="/jwt/owasp-top-10" class="card" id="card-owasp">
+    <span class="card__icon">🛡️</span>
+    <h2 class="card__title">OWASP Top 10 (2021)</h2>
+    <p class="card__desc">Complete breakdown of all 10 vulnerabilities with detailed explanations, real-world examples, exploit POCs, and remediation strategies.</p>
+    <div class="card__tags">
+      <span class="card__tag card__tag--red">Exploits</span>
+      <span class="card__tag card__tag--green">Remediation</span>
+      <span class="card__tag card__tag--purple">10 Vulns</span>
+    </div>
+  </a>
+
+  <a href="/jwt/cookie-stealing" class="card" id="card-cookies">
+    <span class="card__icon">🍪</span>
+    <h2 class="card__title">Cookie Stealing</h2>
+    <p class="card__desc">What cookies are, how they're stolen via XSS and MITM, real Firesheep case study, dummy XSS POC, and complete remediation guide.</p>
+    <div class="card__tags">
+      <span class="card__tag card__tag--red">XSS</span>
+      <span class="card__tag card__tag--orange">MITM</span>
+      <span class="card__tag card__tag--green">HttpOnly</span>
+    </div>
+  </a>
+
+  <a href="/jwt/session-hijacking" class="card" id="card-sessions">
+    <span class="card__icon">🕵️</span>
+    <h2 class="card__title">Session Hijacking</h2>
+    <p class="card__desc">Session mechanics, fixation & sidejacking attacks, real WhatsApp Web case study, session prediction POC, and defense strategies.</p>
+    <div class="card__tags">
+      <span class="card__tag card__tag--red">Fixation</span>
+      <span class="card__tag card__tag--purple">Sidejacking</span>
+      <span class="card__tag card__tag--blue">Defense</span>
+    </div>
+  </a>
+
+  <a href="/jwt/jwt-lab" class="card" id="card-lab">
+    <span class="card__icon">🧪</span>
+    <h2 class="card__title">JWT Manipulation Lab</h2>
+    <p class="card__desc">Interactive lab — encode/decode JWTs live, perform alg:none attacks, tamper payloads, and forge tokens using online resources.</p>
+    <div class="card__tags">
+      <span class="card__tag card__tag--orange">Interactive</span>
+      <span class="card__tag card__tag--red">alg:none</span>
+      <span class="card__tag card__tag--purple">Live Tool</span>
+    </div>
+  </a>
+
+  <a href="/jwt/bcrypt" class="card" id="card-bcrypt">
+    <span class="card__icon">🔒</span>
+    <h2 class="card__title">Bcrypt Introduction</h2>
+    <p class="card__desc">Hashing vs encryption, bcrypt internals, salt rounds, cost factor benchmarks, and live hash/compare interactive tool.</p>
+    <div class="card__tags">
+      <span class="card__tag card__tag--green">Hashing</span>
+      <span class="card__tag card__tag--blue">Salt Rounds</span>
+      <span class="card__tag card__tag--orange">Live Tool</span>
+    </div>
+  </a>
+
+  <a href="/jwt/api/pdf/notes" target="_blank" class="card" id="card-pdf">
+    <span class="card__icon">📄</span>
+    <h2 class="card__title">Download PDF Notes</h2>
+    <p class="card__desc">Get a comprehensive PDF covering all modules — JWT, OWASP Top 10, Cookie Stealing, Session Hijacking, and Bcrypt. Perfect for offline study.</p>
+    <div class="card__tags">
+      <span class="card__tag card__tag--green">PDF</span>
+      <span class="card__tag card__tag--blue">Offline</span>
+      <span class="card__tag card__tag--purple">Complete</span>
+    </div>
+  </a>
+</div>
+
+<%- include('partials/footer') %>

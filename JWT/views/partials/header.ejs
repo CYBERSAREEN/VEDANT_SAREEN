@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="<%= title %> - Interactive JWT & Web Security Learning Platform by XYBERDUMP">
+  <title><%= title %> | XYBERDUMP</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/jwt/public/css/style.css">
+</head>
+<body>
+  <!-- Animated Background -->
+  <div class="bg-grid"></div>
+  <div class="bg-glow bg-glow--1"></div>
+  <div class="bg-glow bg-glow--2"></div>
+
+  <!-- Navigation -->
+  <nav class="nav" id="main-nav">
+    <div class="nav__container">
+      <a href="/jwt" class="nav__logo">
+        <span class="nav__logo-icon">🔐</span>
+        <span class="nav__logo-text">XYBER<span class="text-accent">JWT</span></span>
+      </a>
+
+      <button class="nav__toggle" id="nav-toggle" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
+
+      <ul class="nav__links" id="nav-links">
+        <li><a href="/jwt" class="nav__link <%= currentPage === 'home' ? 'nav__link--active' : '' %>">Home</a></li>
+        <li><a href="/jwt/jwt-fundamentals" class="nav__link <%= currentPage === 'jwt-fundamentals' ? 'nav__link--active' : '' %>">JWT</a></li>
+        <li><a href="/jwt/owasp-top-10" class="nav__link <%= currentPage === 'owasp-top-10' ? 'nav__link--active' : '' %>">OWASP</a></li>
+        <li><a href="/jwt/cookie-stealing" class="nav__link <%= currentPage === 'cookie-stealing' ? 'nav__link--active' : '' %>">Cookies</a></li>
+        <li><a href="/jwt/session-hijacking" class="nav__link <%= currentPage === 'session-hijacking' ? 'nav__link--active' : '' %>">Sessions</a></li>
+        <li><a href="/jwt/jwt-lab" class="nav__link <%= currentPage === 'jwt-lab' ? 'nav__link--active' : '' %>">🧪 Lab</a></li>
+        <li><a href="/jwt/bcrypt" class="nav__link <%= currentPage === 'bcrypt' ? 'nav__link--active' : '' %>">Bcrypt</a></li>
+        <li><a href="/jwt/api/pdf/notes" class="nav__link nav__link--download" target="_blank">📄 PDF</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="main">

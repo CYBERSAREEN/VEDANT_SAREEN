@@ -1,0 +1,432 @@
+<%- include('partials/header') %>
+
+<section class="hero fade-in">
+  <span class="hero__badge">Module 06</span>
+  <h1 class="hero__title">Introduction to Bcrypt</h1>
+  <p class="hero__subtitle">Understanding password hashing, bcrypt internals, salt rounds, cost factors, and interactive hash/compare tools.</p>
+</section>
+
+<div class="container fade-in">
+
+  <!-- What is Bcrypt -->
+  <div class="section">
+    <div class="section__header">
+      <div class="section__number">Section 6.1</div>
+      <h2 class="section__title">What is Bcrypt?</h2>
+    </div>
+    <div class="section__content">
+      <p><strong>Bcrypt</strong> is a password hashing function designed by Niels Provos and David Mazières in 1999, based on the Blowfish cipher. It's specifically designed for password storage — it's intentionally <strong>slow</strong> (unlike MD5/SHA which are designed to be fast), making brute-force attacks computationally expensive.</p>
+      <p>The key innovation of bcrypt is its <strong>adaptive cost factor</strong>: as hardware gets faster, you can increase the cost factor to keep the hash computation equally expensive to brute-force.</p>
+    </div>
+
+    <div class="info-box info-box--explain">
+      <div class="info-box__title">ℹ️ Why Not MD5/SHA for Passwords?</div>
+      <div class="info-box__content">
+        <div class="table-wrap" style="margin:12px 0;">
+          <table>
+            <thead>
+              <tr><th>Algorithm</th><th>Hashes/sec (GPU)</th><th>Time to crack 8-char password</th><th>Suitable for passwords?</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>MD5</code></td><td>~25 billion/sec</td><td>~2 minutes</td><td>❌ Way too fast</td></tr>
+              <tr><td><code>SHA-256</code></td><td>~8 billion/sec</td><td>~7 minutes</td><td>❌ Still too fast</td></tr>
+              <tr><td><code>Bcrypt (cost 12)</code></td><td>~25,000/sec</td><td>~12 years</td><td>✅ Purpose-built</td></tr>
+              <tr><td><code>Argon2id</code></td><td>~5,000/sec</td><td>~60 years</td><td>✅ Gold standard</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Fast hash functions (MD5, SHA) are designed for data integrity checks, not password storage. A GPU can compute billions of MD5 hashes per second, making brute force trivial.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- How Bcrypt Works -->
+  <div class="section">
+    <div class="section__header">
+      <div class="section__number">Section 6.2</div>
+      <h2 class="section__title">How Bcrypt Works</h2>
+    </div>
+
+    <div class="workflow">
+      <div class="workflow__step">
+        <div class="workflow__step-num">Step 1</div>
+        <div class="workflow__step-title">Generate Salt</div>
+        <div class="workflow__step-desc">128-bit random salt</div>
+      </div>
+      <span class="workflow__arrow">→</span>
+      <div class="workflow__step">
+        <div class="workflow__step-num">Step 2</div>
+        <div class="workflow__step-title">Combine</div>
+        <div class="workflow__step-desc">Password + Salt</div>
+      </div>
+      <span class="workflow__arrow">→</span>
+      <div class="workflow__step">
+        <div class="workflow__step-num">Step 3</div>
+        <div class="workflow__step-title">Key Schedule</div>
+        <div class="workflow__step-desc">Blowfish-based EKS</div>
+      </div>
+      <span class="workflow__arrow">→</span>
+      <div class="workflow__step">
+        <div class="workflow__step-num">Step 4</div>
+        <div class="workflow__step-title">Iterate</div>
+        <div class="workflow__step-desc">2^cost rounds</div>
+      </div>
+      <span class="workflow__arrow">→</span>
+      <div class="workflow__step">
+        <div class="workflow__step-num">Step 5</div>
+        <div class="workflow__step-title">Output Hash</div>
+        <div class="workflow__step-desc">60-char string</div>
+      </div>
+    </div>
+
+    <div class="jwt-visual" style="margin-top: 24px;">
+      <div class="jwt-visual__part-title" style="color:var(--accent);margin-bottom:16px;font-size:0.9rem;">BCRYPT HASH FORMAT</div>
+      <pre style="font-family:var(--font-code);font-size:0.95rem;line-height:2;color:var(--text-primary);">
+<span style="color:var(--accent-red);">$2b</span><span style="color:var(--text-muted);">$</span><span style="color:var(--accent-orange);">12</span><span style="color:var(--text-muted);">$</span><span style="color:var(--accent-blue);">LJ3m4ys3Lf0Xg9YGlNkPSO</span><span style="color:var(--accent-purple);">iVcKF/T7vLI2eMyPjjz7YNq.Jz8qDPi</span>
+<span style="color:var(--accent-red);">║ Algorithm version</span>
+<span style="color:var(--accent-orange);">   ║ Cost factor (2^12 = 4,096 iterations)</span>
+<span style="color:var(--accent-blue);">      ║ 22 chars: Base64-encoded 128-bit salt</span>
+<span style="color:var(--accent-purple);">                                 ║ 31 chars: Base64-encoded 184-bit hash</span></pre>
+    </div>
+
+    <div class="info-box info-box--explain">
+      <div class="info-box__title">ℹ️ Algorithm Versions</div>
+      <div class="info-box__content">
+        <ul>
+          <li><code>$2a$</code> — Original bcrypt specification</li>
+          <li><code>$2b$</code> — Current standard — fixes a wrapping bug in <code>$2a$</code> for passwords &gt; 255 bytes</li>
+          <li><code>$2y$</code> — PHP-specific implementation (equivalent to <code>$2b$</code>)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cost Factor -->
+  <div class="section">
+    <div class="section__header">
+      <div class="section__number">Section 6.3</div>
+      <h2 class="section__title">Cost Factor (Salt Rounds)</h2>
+    </div>
+
+    <div class="section__content">
+      <p>The cost factor determines how many iterations the hashing algorithm runs. Each increment <strong>doubles</strong> the computation time. This is the key mechanism that makes bcrypt resistant to brute-force attacks over time.</p>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Cost Factor</th>
+            <th>Iterations</th>
+            <th>Hash Time (approx)</th>
+            <th>Use Case</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>8</code></td>
+            <td>256</td>
+            <td>~40ms</td>
+            <td>⚠️ Too fast for production</td>
+          </tr>
+          <tr>
+            <td><code>10</code></td>
+            <td>1,024</td>
+            <td>~100ms</td>
+            <td>Minimum recommended</td>
+          </tr>
+          <tr>
+            <td><code>12</code></td>
+            <td>4,096</td>
+            <td>~300ms</td>
+            <td>✅ Good balance (recommended default)</td>
+          </tr>
+          <tr>
+            <td><code>14</code></td>
+            <td>16,384</td>
+            <td>~1 sec</td>
+            <td>✅ High security</td>
+          </tr>
+          <tr>
+            <td><code>16</code></td>
+            <td>65,536</td>
+            <td>~4 sec</td>
+            <td>Very high security (may affect UX)</td>
+          </tr>
+          <tr>
+            <td><code>20</code></td>
+            <td>1,048,576</td>
+            <td>~60 sec</td>
+            <td>❌ Too slow for real-time auth</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="info-box info-box--remediation">
+      <div class="info-box__title">✅ How to Choose the Right Cost Factor</div>
+      <div class="info-box__content">
+        <ul>
+          <li>Benchmark on your production hardware: target <strong>250ms–1 second</strong> per hash</li>
+          <li>Start at <strong>cost 12</strong> and increase every ~2 years as hardware improves</li>
+          <li>Remember: users only hash during login/registration (low frequency)</li>
+          <li>On hash: measure time → if &lt; 250ms → increase cost factor</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hashing vs Encryption -->
+  <div class="section">
+    <div class="section__header">
+      <div class="section__number">Section 6.4</div>
+      <h2 class="section__title">Hashing vs Encryption vs Encoding</h2>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Aspect</th><th>Hashing (bcrypt)</th><th>Encryption (AES)</th><th>Encoding (Base64)</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Reversible?</strong></td>
+            <td>❌ One-way (irreversible)</td>
+            <td>✅ Two-way (decrypt with key)</td>
+            <td>✅ Two-way (trivially decodes)</td>
+          </tr>
+          <tr>
+            <td><strong>Purpose</strong></td>
+            <td>Password storage, integrity</td>
+            <td>Protecting sensitive data</td>
+            <td>Data transport (not security!)</td>
+          </tr>
+          <tr>
+            <td><strong>Key required?</strong></td>
+            <td>No key. Uses salt (stored in hash)</td>
+            <td>Yes. Encryption key required</td>
+            <td>No key. Public algorithm</td>
+          </tr>
+          <tr>
+            <td><strong>Same input → same output?</strong></td>
+            <td>No! (different salt each time)</td>
+            <td>Depends on mode (ECB yes, CBC/GCM no)</td>
+            <td>Yes — always deterministic</td>
+          </tr>
+          <tr>
+            <td><strong>Security</strong></td>
+            <td>Can't get password back</td>
+            <td>Data protected while at rest</td>
+            <td>❌ NOT security — just encoding!</td>
+          </tr>
+          <tr>
+            <td><strong>Example</strong></td>
+            <td>bcrypt, Argon2, scrypt</td>
+            <td>AES-256-GCM, ChaCha20</td>
+            <td>Base64, URL encoding, Hex</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Bcrypt vs Others -->
+  <div class="section">
+    <div class="section__header">
+      <div class="section__number">Section 6.5</div>
+      <h2 class="section__title">Bcrypt vs Other Hashing Algorithms</h2>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Algorithm</th><th>Type</th><th>GPU Resistant</th><th>Memory Hard</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>MD5</code></td>
+            <td>General hash</td>
+            <td>❌ No</td>
+            <td>❌ No</td>
+            <td>💀 Broken — never use for passwords</td>
+          </tr>
+          <tr>
+            <td><code>SHA-256</code></td>
+            <td>General hash</td>
+            <td>❌ No</td>
+            <td>❌ No</td>
+            <td>⚠️ Not designed for passwords</td>
+          </tr>
+          <tr>
+            <td><code>bcrypt</code></td>
+            <td>Password hash</td>
+            <td>✅ Partially</td>
+            <td>❌ No</td>
+            <td>✅ Battle-tested, widely used</td>
+          </tr>
+          <tr>
+            <td><code>scrypt</code></td>
+            <td>Password hash</td>
+            <td>✅ Yes</td>
+            <td>✅ Yes</td>
+            <td>✅ Good — memory-hard</td>
+          </tr>
+          <tr>
+            <td><code>Argon2id</code></td>
+            <td>Password hash</td>
+            <td>✅ Yes</td>
+            <td>✅ Yes</td>
+            <td>✅ Gold standard (PHC winner 2015)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Interactive: Hash -->
+  <div class="section">
+    <div class="section__header">
+      <div class="section__number">Lab 6.6</div>
+      <h2 class="section__title">🔒 Live Bcrypt Hash Tool</h2>
+    </div>
+
+    <div class="lab">
+      <div class="lab__title">⚙️ Hash a Password with Bcrypt</div>
+
+      <div class="lab__row">
+        <div class="lab__group">
+          <label class="lab__label" for="bcrypt-password">Password</label>
+          <input class="lab__input" id="bcrypt-password" type="text" value="MySecurePassword123!" placeholder="Enter password to hash...">
+        </div>
+        <div class="lab__group">
+          <label class="lab__label" for="bcrypt-rounds">Salt Rounds (Cost Factor)</label>
+          <select class="lab__select" id="bcrypt-rounds">
+            <option value="4">4 (very fast — testing only)</option>
+            <option value="8">8 (~40ms — development)</option>
+            <option value="10" selected>10 (~100ms — minimum production)</option>
+            <option value="12">12 (~300ms — recommended)</option>
+            <option value="14">14 (~1 sec — high security)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="lab__btn-group">
+        <button class="lab__btn lab__btn--primary" onclick="hashPassword()" id="btn-hash">🔐 Hash Password</button>
+      </div>
+
+      <div class="lab__result" id="bcrypt-hash-result"></div>
+    </div>
+  </div>
+
+  <!-- Interactive: Compare -->
+  <div class="section">
+    <div class="section__header">
+      <div class="section__number">Lab 6.7</div>
+      <h2 class="section__title">🔓 Live Bcrypt Compare Tool</h2>
+    </div>
+
+    <div class="lab">
+      <div class="lab__title">🔍 Verify a Password Against a Hash</div>
+
+      <div class="lab__group">
+        <label class="lab__label" for="bcrypt-compare-password">Password to Verify</label>
+        <input class="lab__input" id="bcrypt-compare-password" type="text" value="MySecurePassword123!" placeholder="Enter password...">
+      </div>
+
+      <div class="lab__group">
+        <label class="lab__label" for="bcrypt-compare-hash">Bcrypt Hash</label>
+        <input class="lab__input" id="bcrypt-compare-hash" type="text" placeholder="Paste bcrypt hash from above...">
+      </div>
+
+      <div class="lab__btn-group">
+        <button class="lab__btn lab__btn--blue" onclick="comparePassword()" id="btn-compare">🔓 Compare</button>
+      </div>
+
+      <div class="lab__result" id="bcrypt-compare-result"></div>
+    </div>
+  </div>
+
+  <!-- Code Example -->
+  <div class="section">
+    <div class="section__header">
+      <div class="section__number">Section 6.8</div>
+      <h2 class="section__title">Bcrypt in Node.js — Complete Example</h2>
+    </div>
+
+    <div class="code-block">
+      <div class="code-block__header">
+        <span class="code-block__lang">JavaScript — User Registration & Login with Bcrypt</span>
+        <button class="code-block__copy">Copy</button>
+      </div>
+      <pre><code>const bcrypt = require('bcryptjs');
+const SALT_ROUNDS = 12;  // Recommended default
+
+// ─── Registration: Hash the password ───────────────────
+app.post('/register', async (req, res) => {
+  const { email, password } = req.body;
+
+  // Validate password strength
+  if (password.length < 12) {
+    return res.status(400).json({ error: 'Password must be at least 12 characters' });
+  }
+
+  // Hash the password (bcrypt automatically generates salt)
+  const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+
+  // Store in database (NEVER store plaintext!)
+  await db.query(
+    'INSERT INTO users (email, password_hash) VALUES ($1, $2)',
+    [email, hashedPassword]
+  );
+
+  // hashedPassword looks like:
+  // $2b$12$LJ3m4ys3Lf0Xg9YGlNkPSOiVcKF/T7vLI2eMyPjjz7YNq.Jz8qDPi
+
+  res.json({ message: 'User registered successfully' });
+});
+
+// ─── Login: Compare password with hash ─────────────────
+app.post('/login', async (req, res) => {
+  const { email, password } = req.body;
+
+  // Fetch user from database
+  const user = await db.query('SELECT * FROM users WHERE email = $1', [email]);
+  if (!user) {
+    // ✅ Don't reveal whether email exists!
+    return res.status(401).json({ error: 'Invalid credentials' });
+  }
+
+  // Compare provided password with stored hash
+  // bcrypt.compare extracts the salt from the hash and applies it
+  const isValid = await bcrypt.compare(password, user.password_hash);
+
+  if (!isValid) {
+    return res.status(401).json({ error: 'Invalid credentials' });
+  }
+
+  // Password is correct! Create session/JWT
+  const token = jwt.sign({ sub: user.id, role: user.role }, SECRET, { expiresIn: '15m' });
+  res.json({ token });
+});
+
+// ─── Password Change: Re-hash with new cost factor ─────
+app.post('/change-password', authenticate, async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  const user = await db.query('SELECT * FROM users WHERE id = $1', [req.user.sub]);
+
+  // Verify current password
+  const isValid = await bcrypt.compare(currentPassword, user.password_hash);
+  if (!isValid) return res.status(401).json({ error: 'Current password incorrect' });
+
+  // Hash new password (possibly with higher cost factor)
+  const newHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
+  await db.query('UPDATE users SET password_hash = $1 WHERE id = $2', [newHash, user.id]);
+
+  res.json({ message: 'Password changed successfully' });
+});</code></pre>
+    </div>
+  </div>
+
+</div>
+
+<%- include('partials/footer') %>
